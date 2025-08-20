@@ -13,6 +13,7 @@ export interface IUser extends Document {
   postCode?: number
   phoneNum?: string
   dateOfBirth?: Date
+  avatars?: string
 
   // Extra fields
   avatar?: {
@@ -25,7 +26,7 @@ export interface IUser extends Document {
   }
   password_reset_token: string
   fine: number
-  refreshToken: string
+  refresh_token: string
 }
 
 export type TLoginUser = {

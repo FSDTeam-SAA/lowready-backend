@@ -18,6 +18,7 @@ const userSchema: Schema = new Schema<IUser>(
       enum: ['male', 'female'],
       required: true,
     },
+    avatars: { type: String },
     bio: { type: String, default: '' },
     street: { type: String, default: '' },
     postCode: { type: Number, default: null },
@@ -35,7 +36,7 @@ const userSchema: Schema = new Schema<IUser>(
     },
     password_reset_token: { type: String, default: '' },
     fine: { type: Number, default: 0 },
-    refreshToken: { type: String, default: '' },
+    refresh_token: { type: String, default: '' },
   },
   { timestamps: true }
 )
