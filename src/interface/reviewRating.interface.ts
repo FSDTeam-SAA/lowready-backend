@@ -3,6 +3,7 @@ import { Document, Model, Types } from 'mongoose'
 export interface IReviewRating extends Document {
   _id: string
   userId: Types.ObjectId
+  facility: Types.ObjectId
   star: number // 1–5
   comment?: string
 }

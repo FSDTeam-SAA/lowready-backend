@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { facilityRouter } from './facility.router'
 import userRouters from './user.routes'
+import reviewRatingRouter from './reviewRating.routes'
 
 const router = Router()
 
@@ -12,6 +13,10 @@ const moduleRoutes = [
   {
     path: '/user',
     route: userRouters,
+  },
+  {
+    path: '/review-rating',
+    route: reviewRatingRouter,
   },
 ]
 
