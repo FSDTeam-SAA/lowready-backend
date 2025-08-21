@@ -269,15 +269,25 @@ export const changePassword = catchAsync(async (req, res) => {
   })
 })
 
+
+
 export const updateUser = catchAsync(async (req: Request, res: Response) => {
   const id = req.user?._id
   const updateData = req.body
 
   if (!id) throw new AppError(httpStatus.BAD_REQUEST, 'User ID is required')
 
-  const allowedFields = ['name', 'phoneNum', 'address']
+  const allowedFields = [
+    'firstName',
+    'lastName',
+    'street',
+    'postCode',
+    'phoneNum',
+    'bio',
+  ]
   const filteredData: Partial<Record<string, any>> = {}
 
+  // filter only allowed fields
   for (const field of allowedFields) {
     if (updateData[field] !== undefined) {
       filteredData[field] = updateData[field]
@@ -285,23 +295,19 @@ export const updateUser = catchAsync(async (req: Request, res: Response) => {
   }
 
   // Handle avatar upload
-  if (req.files && (req.files as any).photo) {
-    const photo = (req.files as any).photo[0]
-    const uploadResult = await uploadToCloudinary(photo.path, 'avatars')
+  if (req.file) {
+    const uploadResult = await uploadToCloudinary(req.file.path, 'avatars')
 
-    // Remove old avatar from Cloudinary if needed (optional)
+    // Remove old avatar from Cloudinary if exists
     const existingUser = await User.findById(id).select('avatar')
-    if (existingUser?.avatar?.url) {
-      const publicId = path.basename(existingUser.avatar.url).split('.')[0]
-      await deleteFromCloudinary(publicId)
+    if (existingUser?.avatar?.public_id) {
+      await deleteFromCloudinary(existingUser.avatar.public_id)
     }
 
     filteredData.avatar = {
-      url: uploadResult?.secure_url,
+      url: uploadResult.secure_url,
+      public_id: uploadResult.public_id,
     }
-
-    // Delete local file
-    fs.unlinkSync(photo.path)
   }
 
   const updatedUser = await User.findByIdAndUpdate(id, filteredData, {
@@ -320,6 +326,60 @@ export const updateUser = catchAsync(async (req: Request, res: Response) => {
     data: updatedUser,
   })
 })
+
+
+
+// export const updateUser = catchAsync(async (req: Request, res: Response) => {
+//   const id = req.user?._id
+//   const updateData = req.body
+
+//   if (!id) throw new AppError(httpStatus.BAD_REQUEST, 'User ID is required')
+
+//   const allowedFields = ['firstName', 'lastName', 'avatars', 'street', 'postCode', 'phoneNum', 'bio']
+//   const filteredData: Partial<Record<string, any>> = {}
+
+//   for (const field of allowedFields) {
+//     if (updateData[field] !== undefined) {
+//       filteredData[field] = updateData[field]
+//     }
+//   }
+
+//   // Handle avatar upload
+//   if (req.files && (req.files as any).photo) {
+//     const photo = (req.files as any).photo[0]
+//     const uploadResult = await uploadToCloudinary(photo.path, 'avatar')
+
+//     // Remove old avatar from Cloudinary if needed (optional)
+//     const existingUser = await User.findById(id).select('avatar')
+//     if (existingUser?.avatar?.url) {
+//       const publicId = path.basename(existingUser.avatar.url).split('.')[0]
+//       await deleteFromCloudinary(publicId)
+//     }
+
+//     filteredData.avatar = {
+//       url: uploadResult?.secure_url,
+//     }
+
+//     // Delete local file
+//     fs.unlinkSync(photo.path)
+//   }
+
+//   const updatedUser = await User.findByIdAndUpdate(id, filteredData, {
+//     new: true,
+//     runValidators: true,
+//   }).select('-password -verificationInfo -password_reset_token')
+
+//   if (!updatedUser) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'User not found or not updated')
+//   }
+
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'User updated successfully',
+//     data: updatedUser,
+//   })
+// })
 
 export const refreshToken = catchAsync(async (req, res) => {
   const { refreshToken } = req.body
