@@ -83,7 +83,6 @@ export const login = catchAsync(async (req, res) => {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found')
   }
 
-
   // Check password
   if (!(await User.isPasswordMatched(password, user.password as string))) {
     throw new AppError(httpStatus.FORBIDDEN, 'Password is incorrect')
@@ -269,8 +268,6 @@ export const changePassword = catchAsync(async (req, res) => {
   })
 })
 
-
-
 export const updateUser = catchAsync(async (req: Request, res: Response) => {
   const id = req.user?._id
   const updateData = req.body
@@ -327,60 +324,6 @@ export const updateUser = catchAsync(async (req: Request, res: Response) => {
   })
 })
 
-
-
-// export const updateUser = catchAsync(async (req: Request, res: Response) => {
-//   const id = req.user?._id
-//   const updateData = req.body
-
-//   if (!id) throw new AppError(httpStatus.BAD_REQUEST, 'User ID is required')
-
-//   const allowedFields = ['firstName', 'lastName', 'avatars', 'street', 'postCode', 'phoneNum', 'bio']
-//   const filteredData: Partial<Record<string, any>> = {}
-
-//   for (const field of allowedFields) {
-//     if (updateData[field] !== undefined) {
-//       filteredData[field] = updateData[field]
-//     }
-//   }
-
-//   // Handle avatar upload
-//   if (req.files && (req.files as any).photo) {
-//     const photo = (req.files as any).photo[0]
-//     const uploadResult = await uploadToCloudinary(photo.path, 'avatar')
-
-//     // Remove old avatar from Cloudinary if needed (optional)
-//     const existingUser = await User.findById(id).select('avatar')
-//     if (existingUser?.avatar?.url) {
-//       const publicId = path.basename(existingUser.avatar.url).split('.')[0]
-//       await deleteFromCloudinary(publicId)
-//     }
-
-//     filteredData.avatar = {
-//       url: uploadResult?.secure_url,
-//     }
-
-//     // Delete local file
-//     fs.unlinkSync(photo.path)
-//   }
-
-//   const updatedUser = await User.findByIdAndUpdate(id, filteredData, {
-//     new: true,
-//     runValidators: true,
-//   }).select('-password -verificationInfo -password_reset_token')
-
-//   if (!updatedUser) {
-//     throw new AppError(httpStatus.NOT_FOUND, 'User not found or not updated')
-//   }
-
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: 'User updated successfully',
-//     data: updatedUser,
-//   })
-// })
-
 export const refreshToken = catchAsync(async (req, res) => {
   const { refreshToken } = req.body
 
@@ -423,3 +366,43 @@ export const refreshToken = catchAsync(async (req, res) => {
     data: { accessToken: accessToken, refreshToken: refreshToken1 },
   })
 })
+
+
+export const getAllNormalUsers = catchAsync(
+  async (req: Request, res: Response) => {
+    const { page = 1, limit = 10, search } = req.query
+
+    const pageNum = Number(page)
+    const limitNum = Number(limit)
+    const skip = (pageNum - 1) * limitNum
+
+    const query: any = { role: 'user' }
+
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ]
+    }
+
+    const users = await User.find(query)
+      .select('-password -refresh_token -password_reset_token')
+      .skip(skip)
+      .limit(limitNum)
+
+    const total = await User.countDocuments(query)
+
+    res.status(200).json({
+      success: true,
+      message: 'All users with role=user fetched successfully',
+      data: users,
+      meta: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    })
+  }
+)
