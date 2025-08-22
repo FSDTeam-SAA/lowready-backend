@@ -8,6 +8,7 @@ import sendResponse from "../utils/sendResponse";
 const createFacility = catchAsync(async (req, res) => {
   try {
     const { _id: userId } = req.user as any;
+
     const user = await User.findById(userId);
     if (!user) {
       throw new AppError(404, "User not found");
@@ -65,13 +66,13 @@ const createFacility = catchAsync(async (req, res) => {
       }
     }
 
-    // ✅ Validate required fields
     if (!base) throw new AppError(400, "Base plan is required");
     if (!location) throw new AppError(400, "Location is required");
 
     // Create facility
     const facility = await Facility.create({
       ...rest,
+      userId,
       base,
       location,
       services,
@@ -87,7 +88,6 @@ const createFacility = catchAsync(async (req, res) => {
       data: facility,
     });
   } catch (error) {
-    console.log("Error creating facility:", error);
     throw new AppError(500, "Failed to create facility");
   }
 });
