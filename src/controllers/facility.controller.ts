@@ -92,7 +92,21 @@ const createFacility = catchAsync(async (req, res) => {
   }
 });
 
+const getMyFacilities = catchAsync(async (req, res) => {
+  const { _id: userId } = req.user as any;
+
+  const facilities = await Facility.find({ userId });
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Facilities retrieved successfully",
+    data: facilities,
+  });
+});
+
 const facilityController = {
   createFacility,
+  getMyFacilities,
 };
 export default facilityController;
