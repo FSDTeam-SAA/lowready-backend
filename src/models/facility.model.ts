@@ -4,52 +4,44 @@ import { IFacility, FacilityModel } from "../interface/facility.interface";
 const facilitySchema: Schema = new Schema<IFacility>(
   {
     availability: { type: Boolean, default: true },
-    name: { type: String, required: true, message: "Name is required" },
-    location: { type: String, required: true, message: "Location is required" },
-    description: {
-      type: String,
-      required: true,
-      message: "Description is required",
+    name: { type: String, required: [true, "Name is required"] },
+    location: { type: String, required: [true, "Location is required"] },
+    description: { type: String, required: [true, "Description is required"] },
+    price: { type: Number, required: [true, "Price is required"] },
+    image: {
+      public_id: {
+        type: String,
+        default: "",
+        required: [true, "Image public_id is required"],
+      },
+      url: {
+        type: String,
+        default: "",
+        required: [true, "Image URL is required"],
+      },
     },
-    price: { type: Number, required: true, message: "Price is required" },
-    image: { type: String, required: true, message: "Image is required" },
     base: {
       type: String,
       enum: ["monthly", "yearly"],
-      required: true,
-      message: "Select a base plan",
+      required: [true, "Select a base plan"],
     },
-    amenities: [
-      { type: String, required: true, message: "Add at least one amenity" },
-    ],
-    offers: [
-      { type: String, required: true, message: "Add at least one offer" },
-    ],
+    amenities: [{ type: String, required: [true, "Add at least one amenity"] }],
+    offers: [{ type: String, required: [true, "Add at least one offer"] }],
     services: [
       {
-        label: { type: String, required: true },
-        title: { type: String, required: true },
-        message: "Service label and title are required",
+        label: { type: String, required: [true, "Service label is required"] },
+        title: { type: String, required: [true, "Service title is required"] },
       },
     ],
-    about: { type: String, required: true, message: "About is required" },
-    videoTitle: {
-      type: String,
-      required: true,
-      message: "Video title is required",
-    },
+    about: { type: String, required: [true, "About is required"] },
+    videoTitle: { type: String, required: [true, "Video title is required"] },
     videoDescription: {
       type: String,
-      required: true,
-      message: "Video description is required",
+      required: [true, "Video description is required"],
     },
-    uploadVideo: {
-      type: String,
-      required: true,
-      message: "Upload video is required",
-    },
+    uploadVideo: { type: String, default: "" },
     availableTime: [
-      { type: Date, required: true, message: "Available time is required" },
+      { type: Date, required: [true, "Available time is required"] },
     ],
   },
   { timestamps: true }
