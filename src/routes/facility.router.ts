@@ -23,4 +23,23 @@ router.get(
   facilityController.getMyFacilities
 );
 
+router.get("/all", facilityController.getAllFacilities);
+
+router.put(
+  "/update/my-facility",
+  protect,
+  isOrganization,
+  upload.fields([
+    { name: "image", maxCount: 5 },
+    { name: "video", maxCount: 1 },
+  ]),
+  facilityController.updateFacility
+);
+
+router.get(
+  "/:facilityId",
+  // protect
+  facilityController.getSingleFacility
+);
+
 export const facilityRouter = router;
