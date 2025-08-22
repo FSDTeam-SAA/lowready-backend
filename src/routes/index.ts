@@ -1,25 +1,30 @@
-import { Router } from 'express'
-import { facilityRouter } from './facility.router'
-import userRouters from './user.routes'
-import reviewRatingRouter from './reviewRating.routes'
+import { Router } from "express";
+import { facilityRouter } from "./facility.router";
+import userRouters from "./user.routes";
+import reviewRatingRouter from "./reviewRating.routes";
+import blogRouter from "./blog.router";
 
-const router = Router()
+const router = Router();
 
 const moduleRoutes = [
   {
-    path: '/facility',
+    path: "/facility",
     route: facilityRouter,
   },
   {
-    path: '/user',
+    path: "/user",
     route: userRouters,
   },
   {
-    path: '/review-rating',
+    path: "/review-rating",
     route: reviewRatingRouter,
   },
-]
+  {
+    path: "/blog",
+    route: blogRouter,
+  },
+];
 
-moduleRoutes.forEach((route) => router.use(route.path, route.route))
+moduleRoutes.forEach((route) => router.use(route.path, route.route));
 
-export default router
+export default router;
