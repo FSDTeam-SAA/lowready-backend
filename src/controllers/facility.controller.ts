@@ -15,9 +15,9 @@ const createFacility = catchAsync(async (req, res) => {
 
     let image = { public_id: "", url: "" };
     if (req.file) {
-    //   console.log(req.file);
+      //   console.log(req.file);
       const uploadResult = await uploadToCloudinary(req.file.path);
-    //   console.log(12, uploadResult);
+      //   console.log(12, uploadResult);
       if (uploadResult) {
         image = {
           public_id: uploadResult.public_id,

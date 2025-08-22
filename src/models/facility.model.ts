@@ -39,7 +39,7 @@ const facilitySchema: Schema = new Schema<IFacility>(
       type: String,
       required: [true, "Video description is required"],
     },
-    uploadVideo: { type: String, required: [true, "Upload video is required"] },
+    uploadVideo: { type: String, default: "" },
     availableTime: [
       { type: Date, required: [true, "Available time is required"] },
     ],
