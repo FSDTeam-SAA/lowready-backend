@@ -85,9 +85,74 @@ const getSingleBlog = catchAsync(async (req, res) => {
   }
 });
 
+const updateBlog = catchAsync(async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const { title, description } = req.body;
+
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      throw new AppError(404, "Blog not found");
+    }
+
+    let updateData: any = {
+      title: title ?? blog.title,
+      description: description ?? blog.description,
+    };
+
+    if (req.file) {
+      const uploadResult = await uploadToCloudinary(req.file.path, "blogs");
+      if (uploadResult) {
+        updateData.image = {
+          public_id: uploadResult.public_id,
+          url: uploadResult.secure_url,
+        };
+      }
+    } else {
+      updateData.image = blog.image;
+    }
+
+    const result = await Blog.findByIdAndUpdate(blogId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    return sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Blog updated successfully!",
+      data: result,
+    });
+  } catch (error) {
+    throw new AppError(500, "Failed to update blog");
+  }
+});
+
+const deleteBlog = catchAsync(async (req, res) => {
+  try {
+    const { blogId } = req.params;
+
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      throw new AppError(404, "Blog not found");
+    }
+    await Blog.findByIdAndDelete(blogId);
+
+    return sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Blog deleted successfully!",
+    });
+  } catch (error) {
+    throw new AppError(500, "Failed to delete blog");
+  }
+});
+
 const blogController = {
   createBlog,
   getAllBlogs,
   getSingleBlog,
+  updateBlog,
+  deleteBlog,
 };
 export default blogController;

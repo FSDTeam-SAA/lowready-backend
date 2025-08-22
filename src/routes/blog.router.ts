@@ -8,6 +8,13 @@ router.post("/create", upload.single("image"), blogController.createBlog);
 router.get("/all", blogController.getAllBlogs);
 
 router.get("/:blogId", blogController.getSingleBlog);
+router.put(
+  "/update/:blogId",
+  upload.single("image"),
+  blogController.updateBlog
+);
+
+router.delete("/delete/:blogId", blogController.deleteBlog);
 
 const blogRouter = router;
 export default blogRouter;
