@@ -31,7 +31,7 @@ export const register = catchAsync(async (req, res) => {
     avatars,
   } = req.body
 
-  if (!firstName || !lastName || !email || !password || !gender) {
+  if (!firstName || !lastName || !email || !password) {
     throw new AppError(
       httpStatus.FORBIDDEN,
       'Please fill in all required fields'
