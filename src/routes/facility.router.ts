@@ -16,4 +16,11 @@ router.post(
   facilityController.createFacility
 );
 
+router.get(
+  "/my-facilities",
+  protect,
+  isOrganization,
+  facilityController.getMyFacilities
+);
+
 export const facilityRouter = router;
