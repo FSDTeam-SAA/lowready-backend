@@ -1,4 +1,4 @@
-import { Document, Model } from "mongoose";
+import { Document, Model, Types } from "mongoose";
 
 export interface IService {
   label: string;
@@ -12,7 +12,8 @@ export interface IFacility extends Document {
   location: string;
   description?: string;
   price: number;
-  image: string;
+  userId: Types.ObjectId;
+  images: string;
   base: "monthly" | "yearly";
   amenities: string[];
   offers: string[];

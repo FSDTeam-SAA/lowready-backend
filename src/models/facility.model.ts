@@ -8,18 +8,19 @@ const facilitySchema: Schema = new Schema<IFacility>(
     location: { type: String, required: [true, "Location is required"] },
     description: { type: String, required: [true, "Description is required"] },
     price: { type: Number, required: [true, "Price is required"] },
-    image: {
-      public_id: {
-        type: String,
-        default: "",
-        required: [true, "Image public_id is required"],
-      },
-      url: {
-        type: String,
-        default: "",
-        required: [true, "Image URL is required"],
-      },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
+    images: [
+      {
+        public_id: {
+          type: String,
+          default: "",
+        },
+        url: { type: String, default: "" },
+      },
+    ],
     base: {
       type: String,
       enum: ["monthly", "yearly"],

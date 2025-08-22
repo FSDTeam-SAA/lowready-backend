@@ -13,33 +13,70 @@ const createFacility = catchAsync(async (req, res) => {
       throw new AppError(404, "User not found");
     }
 
-    let image = { public_id: "", url: "" };
-    if (req.file) {
-      //   console.log(req.file);
-      const uploadResult = await uploadToCloudinary(req.file.path);
-      //   console.log(12, uploadResult);
-      if (uploadResult) {
-        image = {
-          public_id: uploadResult.public_id,
-          url: uploadResult.secure_url,
-        };
-      }
-    }
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    const video = req.files?.video as Express.Multer.File[];
-    let uploadVideo: string[] = [];
-    if (video) {
-      for (const file of video) {
-        const uploadResult = await uploadToCloudinary(file.path);
+    // Handle images
+    let images: { public_id: string; url: string }[] = [];
+    if (files?.image && files.image.length > 0) {
+      for (const file of files.image) {
+        const uploadResult = await uploadToCloudinary(file.path, "facilities");
         if (uploadResult) {
-          uploadVideo.push(uploadResult.secure_url);
+          images.push({
+            public_id: uploadResult.public_id,
+            url: uploadResult.secure_url,
+          });
         }
       }
+    } else {
+      throw new AppError(400, "At least one image is required");
     }
 
+    // Handle single video
+    let uploadVideo = "";
+    if (files?.video && files.video.length > 0) {
+      const uploadResult = await uploadToCloudinary(
+        files.video[0].path,
+        "facilities"
+      );
+      if (uploadResult) {
+        uploadVideo = uploadResult.secure_url;
+      }
+    }
+
+    // ✅ Parse JSON fields safely
+    let { services, availableTime, base, location, ...rest } = req.body;
+
+    if (services && typeof services === "string") {
+      try {
+        services = JSON.parse(services);
+      } catch {
+        throw new AppError(400, "Invalid services format, must be JSON array");
+      }
+    }
+
+    if (availableTime && typeof availableTime === "string") {
+      try {
+        availableTime = JSON.parse(availableTime);
+      } catch {
+        throw new AppError(
+          400,
+          "Invalid availableTime format, must be JSON array of dates"
+        );
+      }
+    }
+
+    // ✅ Validate required fields
+    if (!base) throw new AppError(400, "Base plan is required");
+    if (!location) throw new AppError(400, "Location is required");
+
+    // Create facility
     const facility = await Facility.create({
-      ...req.body,
-      image,
+      ...rest,
+      base,
+      location,
+      services,
+      availableTime,
+      images,
       uploadVideo,
     });
 
@@ -50,6 +87,7 @@ const createFacility = catchAsync(async (req, res) => {
       data: facility,
     });
   } catch (error) {
+    console.log("Error creating facility:", error);
     throw new AppError(500, "Failed to create facility");
   }
 });
