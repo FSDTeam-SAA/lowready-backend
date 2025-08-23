@@ -4,6 +4,7 @@ import userRouters from "./user.routes";
 import reviewRatingRouter from "./reviewRating.routes";
 import blogRouter from "./blog.router";
 import contactUsRouter from "./contactUs.router";
+import visitBookingRouter from "./visitBooking.router";
 
 const router = Router();
 
@@ -27,6 +28,10 @@ const moduleRoutes = [
   {
     path: "/contactUs",
     route: contactUsRouter,
+  },
+  {
+    path: "/visit-booking",
+    route: visitBookingRouter,
   },
 ];
 
