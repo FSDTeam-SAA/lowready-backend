@@ -3,6 +3,7 @@ import { facilityRouter } from "./facility.router";
 import userRouters from "./user.routes";
 import reviewRatingRouter from "./reviewRating.routes";
 import blogRouter from "./blog.router";
+import contactUsRouter from "./contactUs.router";
 
 const router = Router();
 
@@ -22,6 +23,10 @@ const moduleRoutes = [
   {
     path: "/blog",
     route: blogRouter,
+  },
+  {
+    path: "/contactUs",
+    route: contactUsRouter,
   },
 ];
 
