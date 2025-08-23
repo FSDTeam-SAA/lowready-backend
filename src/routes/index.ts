@@ -1,40 +1,45 @@
-import { Router } from "express";
-import { facilityRouter } from "./facility.router";
-import userRouters from "./user.routes";
-import reviewRatingRouter from "./reviewRating.routes";
-import blogRouter from "./blog.router";
-import contactUsRouter from "./contactUs.router";
-import visitBookingRouter from "./visitBooking.router";
+import { Router } from 'express'
+import { facilityRouter } from './facility.router'
+import userRouters from './user.routes'
+import reviewRatingRouter from './reviewRating.routes'
+import blogRouter from './blog.router'
+import contactUsRouter from './contactUs.router'
+import visitBookingRouter from './visitBooking.router'
+import bookingRouter from './bookHome.route'
 
-const router = Router();
+const router = Router()
 
 const moduleRoutes = [
   {
-    path: "/facility",
+    path: '/facility',
     route: facilityRouter,
   },
   {
-    path: "/user",
+    path: '/user',
     route: userRouters,
   },
   {
-    path: "/review-rating",
+    path: '/review-rating',
     route: reviewRatingRouter,
   },
   {
-    path: "/blog",
+    path: '/blog',
     route: blogRouter,
   },
   {
-    path: "/contactUs",
+    path: '/contactUs',
     route: contactUsRouter,
   },
   {
-    path: "/visit-booking",
+    path: '/visit-booking',
     route: visitBookingRouter,
   },
-];
+  {
+    path: '/bookings',
+    route: bookingRouter,
+  },
+]
 
-moduleRoutes.forEach((route) => router.use(route.path, route.route));
+moduleRoutes.forEach((route) => router.use(route.path, route.route))
 
-export default router;
+export default router
