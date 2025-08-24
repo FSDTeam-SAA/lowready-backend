@@ -179,10 +179,40 @@ const updateVisitBookingStatus = catchAsync(async (req, res) => {
   });
 });
 
+const addFeedback = catchAsync(async (req, res) => {
+  const { bookingId } = req.params;
+  const { feedback } = req.body;
+
+  const visitBooking = await VisitBooking.findById(bookingId);
+  if (!visitBooking) throw new AppError(404, "Visit booking not found");
+
+  const result = await VisitBooking.findByIdAndUpdate(
+    bookingId,
+    { feedback },
+    { new: true }
+  )
+    .populate({
+      path: "facility",
+      select: "name location price images",
+    })
+    .populate({
+      path: "userId",
+      select: "firstName lastName email phoneNumber",
+    });
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Feedback added successfully",
+    data: result,
+  });
+});
+
 const visitBookingController = {
   createVisitBooking,
   getMyVisitBookings,
   getMyFacilityBookings,
   updateVisitBookingStatus,
+  addFeedback,
 };
 export default visitBookingController;
