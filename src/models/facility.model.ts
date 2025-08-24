@@ -26,9 +26,9 @@ const facilitySchema: Schema = new Schema<IFacility>(
       enum: ["monthly", "yearly"],
       required: [true, "Select a base plan"],
     },
-    amenities: [{ type: String, required: [true, "Add at least one amenity"] }],
+    services: [{ type: String, required: [true, "Add at least one service"] }],
     offers: [{ type: String, required: [true, "Add at least one offer"] }],
-    services: [
+    amenities: [
       {
         type: String,
         enum: [
@@ -41,7 +41,7 @@ const facilitySchema: Schema = new Schema<IFacility>(
           "Social and Recreational Activities",
           "Health Monitoring and Coordination",
         ],
-        required: [true, "Select at least one service"],
+        required: [true, "Select at least one amenity"],
       },
     ],
     about: { type: String, required: [true, "About is required"] },

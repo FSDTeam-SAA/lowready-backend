@@ -181,14 +181,14 @@ const updateVisitBookingStatus = catchAsync(async (req, res) => {
 
 const addFeedback = catchAsync(async (req, res) => {
   const { bookingId } = req.params;
-  const { feedback } = req.body;
+  const { feedback, rating } = req.body;
 
   const visitBooking = await VisitBooking.findById(bookingId);
   if (!visitBooking) throw new AppError(404, "Visit booking not found");
 
   const result = await VisitBooking.findByIdAndUpdate(
     bookingId,
-    { feedback },
+    { feedback, rating },
     { new: true }
   )
     .populate({
