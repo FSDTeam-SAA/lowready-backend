@@ -14,6 +14,11 @@ const createFacility = catchAsync(async (req, res) => {
       throw new AppError(404, "User not found");
     }
 
+    const alreadyHasFacility = await Facility.findOne({ userId });
+    if (alreadyHasFacility) {
+      throw new AppError(400, "You already have a facility");
+    }
+
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     // Handle images
@@ -47,25 +52,6 @@ const createFacility = catchAsync(async (req, res) => {
     // ✅ Parse JSON fields safely
     let { services, availableTime, base, location, ...rest } = req.body;
 
-    // if (services && typeof services === "string") {
-    //   try {
-    //     services = JSON.parse(services);
-    //   } catch {
-    //     throw new AppError(400, "Invalid services format, must be JSON array");
-    //   }
-    // }
-
-    // if (availableTime && typeof availableTime === "string") {
-    //   try {
-    //     availableTime = JSON.parse(availableTime);
-    //   } catch {
-    //     throw new AppError(
-    //       400,
-    //       "Invalid availableTime format, must be JSON array of dates"
-    //     );
-    //   }
-    // }
-
     if (!base) throw new AppError(400, "Base plan is required");
     if (!location) throw new AppError(400, "Location is required");
 
@@ -96,7 +82,10 @@ const createFacility = catchAsync(async (req, res) => {
 const getMyFacilities = catchAsync(async (req, res) => {
   const { _id: userId } = req.user as any;
 
-  const facilities = await Facility.find({ userId });
+  const facilities = await Facility.find({ userId }).populate({
+    path: "userId",
+    select: "firstName lastName email phoneNumber",
+  });
 
   return sendResponse(res, {
     statusCode: 200,

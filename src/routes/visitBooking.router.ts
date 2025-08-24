@@ -22,5 +22,19 @@ router.get(
   visitBookingController.getMyVisitBookings
 );
 
+router.get(
+  "/facility-bookings",
+  protect,
+  isOrganization,
+  visitBookingController.getMyFacilityBookings
+);
+
+router.put(
+  "/status/:bookingId",
+  protect,
+  isOrganization,
+  visitBookingController.updateVisitBookingStatus
+);
+
 const visitBookingRouter = router;
 export default visitBookingRouter;

@@ -11,6 +11,8 @@ export interface IVisitBooking extends Document {
   facility: Types.ObjectId;
   visitDate: Date;
   visitTime: string;
+  status: "upcoming" | "completed" | "cancelled";
+  feedback?: string;
 }
 
 export interface VisitBookingModel extends Model<IVisitBooking> {}
