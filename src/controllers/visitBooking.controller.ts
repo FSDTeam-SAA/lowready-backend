@@ -24,6 +24,17 @@ const createVisitBooking = catchAsync(async (req, res) => {
     const isFacilityExists = await Facility.findById(facility);
     if (!isFacilityExists) throw new AppError(404, "Facility not found ");
 
+
+    if (
+      !isFacilityExists.availableTime ||
+      !isFacilityExists.availableTime.includes(visitTime)
+    ) {
+      throw new AppError(
+        400,
+        `${visitTime} is not available. Please choose another one.`
+      );
+    }
+
     const visitBooking = await VisitBooking.create({
       userId,
       name,
@@ -32,6 +43,8 @@ const createVisitBooking = catchAsync(async (req, res) => {
       relationWith,
       message,
       facility,
+      visitDate,
+      visitTime,
     });
 
     return sendResponse(res, {

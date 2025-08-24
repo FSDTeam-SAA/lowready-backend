@@ -47,24 +47,24 @@ const createFacility = catchAsync(async (req, res) => {
     // ✅ Parse JSON fields safely
     let { services, availableTime, base, location, ...rest } = req.body;
 
-    if (services && typeof services === "string") {
-      try {
-        services = JSON.parse(services);
-      } catch {
-        throw new AppError(400, "Invalid services format, must be JSON array");
-      }
-    }
+    // if (services && typeof services === "string") {
+    //   try {
+    //     services = JSON.parse(services);
+    //   } catch {
+    //     throw new AppError(400, "Invalid services format, must be JSON array");
+    //   }
+    // }
 
-    if (availableTime && typeof availableTime === "string") {
-      try {
-        availableTime = JSON.parse(availableTime);
-      } catch {
-        throw new AppError(
-          400,
-          "Invalid availableTime format, must be JSON array of dates"
-        );
-      }
-    }
+    // if (availableTime && typeof availableTime === "string") {
+    //   try {
+    //     availableTime = JSON.parse(availableTime);
+    //   } catch {
+    //     throw new AppError(
+    //       400,
+    //       "Invalid availableTime format, must be JSON array of dates"
+    //     );
+    //   }
+    // }
 
     if (!base) throw new AppError(400, "Base plan is required");
     if (!location) throw new AppError(400, "Location is required");
@@ -88,6 +88,7 @@ const createFacility = catchAsync(async (req, res) => {
       data: facility,
     });
   } catch (error) {
+    console.log({ error });
     throw new AppError(500, "Failed to create facility");
   }
 });

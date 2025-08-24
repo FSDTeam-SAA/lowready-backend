@@ -22,7 +22,7 @@ export interface IFacility extends Document {
   videoTitle?: string;
   videoDescription?: string;
   uploadVideo?: string[];
-  availableTime: Date;
+  availableTime: string[];
 }
 
 export interface FacilityModel extends Model<IFacility> {}

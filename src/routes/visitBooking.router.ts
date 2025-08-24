@@ -1,6 +1,10 @@
 import { Router } from "express";
 import visitBookingController from "../controllers/visitBooking.controller";
-import { isUser, protect } from "../middlewares/auth.middleware";
+import {
+  isOrganization,
+  isUser,
+  protect,
+} from "../middlewares/auth.middleware";
 
 const router = Router();
 
