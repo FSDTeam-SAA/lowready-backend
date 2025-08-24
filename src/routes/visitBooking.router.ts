@@ -36,5 +36,12 @@ router.put(
   visitBookingController.updateVisitBookingStatus
 );
 
+router.put(
+  "/feedback/:bookingId",
+  protect,
+  isUser,
+  visitBookingController.addFeedback
+);
+
 const visitBookingRouter = router;
 export default visitBookingRouter;
