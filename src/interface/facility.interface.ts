@@ -15,9 +15,9 @@ export interface IFacility extends Document {
   userId: Types.ObjectId;
   images: string;
   base: "monthly" | "yearly";
-  amenities: string[];
+  services: string[]; // not sure about this
   offers: string[];
-  services:
+  amenities:
     | "Room and Board (Private or Shared Rooms)"
     | "Assistance with Activities of Daily Living"
     | "Medication Management"
@@ -31,6 +31,7 @@ export interface IFacility extends Document {
   videoDescription?: string;
   uploadVideo?: string[];
   availableTime: string[];
+  Medicaid: boolean; // not sure about this
 }
 
 export interface FacilityModel extends Model<IFacility> {}
