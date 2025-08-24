@@ -24,6 +24,9 @@ const createVisitBooking = catchAsync(async (req, res) => {
     const isFacilityExists = await Facility.findById(facility);
     if (!isFacilityExists) throw new AppError(404, "Facility not found ");
 
+    if (!facility.availability === false) {
+      throw new AppError(400, "Facility is not available for booking");
+    }
 
     if (
       !isFacilityExists.availableTime ||
@@ -58,7 +61,27 @@ const createVisitBooking = catchAsync(async (req, res) => {
   }
 });
 
+const getMyVisitBookings = catchAsync(async (req, res) => {
+  const { _id: userId } = req.user as any;
+
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(404, "User not found");
+
+  const visitBookings = await VisitBooking.find({ userId }).populate({
+    path: "facility",
+    select: "name location price images",
+  });
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Visit Bookings retrieved successfully",
+    data: visitBookings,
+  });
+});
+
 const visitBookingController = {
   createVisitBooking,
+  getMyVisitBookings,
 };
 export default visitBookingController;

@@ -15,5 +15,12 @@ router.post(
   visitBookingController.createVisitBooking
 );
 
+router.get(
+  "/my-bookings",
+  protect,
+  isUser,
+  visitBookingController.getMyVisitBookings
+);
+
 const visitBookingRouter = router;
 export default visitBookingRouter;
