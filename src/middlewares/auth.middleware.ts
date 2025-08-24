@@ -56,7 +56,7 @@ export const isUser = (
   next: NextFunction
 ): void => {
   if (req.user?.role !== "user") {
-    throw new AppError(403, "Access denied. You are not an user.");
+    throw new AppError(403, "You are not authorized");
   }
   next();
 };
