@@ -33,6 +33,7 @@ const facilitySchema: Schema = new Schema<IFacility>(
         label: { type: String, required: [true, "Service label is required"] },
         title: { type: String, required: [true, "Service title is required"] },
       },
+      { _id: false },
     ],
     about: { type: String, required: [true, "About is required"] },
     videoTitle: { type: String, required: [true, "Video title is required"] },
@@ -42,7 +43,7 @@ const facilitySchema: Schema = new Schema<IFacility>(
     },
     uploadVideo: { type: String, default: "" },
     availableTime: [
-      { type: Date, required: [true, "Available time is required"] },
+      { type: String, required: [true, "Available time is required"] },
     ],
   },
   { timestamps: true }
