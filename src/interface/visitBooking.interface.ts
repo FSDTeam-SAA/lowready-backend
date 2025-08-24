@@ -12,6 +12,7 @@ export interface IVisitBooking extends Document {
   visitDate: Date;
   visitTime: string;
   status: "upcoming" | "completed" | "cancelled";
+  rating: number;
   feedback?: string;
 }
 
