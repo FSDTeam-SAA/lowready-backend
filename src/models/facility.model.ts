@@ -30,10 +30,19 @@ const facilitySchema: Schema = new Schema<IFacility>(
     offers: [{ type: String, required: [true, "Add at least one offer"] }],
     services: [
       {
-        label: { type: String, required: [true, "Service label is required"] },
-        title: { type: String, required: [true, "Service title is required"] },
+        type: String,
+        enum: [
+          "Room and Board (Private or Shared Rooms)",
+          "Assistance with Activities of Daily Living",
+          "Medication Management",
+          "Meals and Nutrition",
+          "Housekeeping and Laundry ",
+          "Transportation",
+          "Social and Recreational Activities",
+          "Health Monitoring and Coordination",
+        ],
+        required: [true, "Select at least one service"],
       },
-      { _id: false },
     ],
     about: { type: String, required: [true, "About is required"] },
     videoTitle: { type: String, required: [true, "Video title is required"] },
