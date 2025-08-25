@@ -6,9 +6,14 @@ import blogRouter from './blog.router'
 import contactUsRouter from './contactUs.router'
 import visitBookingRouter from './visitBooking.router'
 import bookingRouter from './bookHome.route'
+
 import docuementRouter from './document.routes'
 import documentRouter from './document.routes'
 import accountRoutes from './account.routes'
+
+import notificationRouter from './notification.route'
+import newsLetterRouter from './newsLetter.route'
+
 
 const router = Router()
 
@@ -41,6 +46,7 @@ const moduleRoutes = [
     path: '/bookings',
     route: bookingRouter,
   },
+
    {
     path: '/document',
     route: documentRouter,
@@ -48,6 +54,15 @@ const moduleRoutes = [
   {
     path: '/account',
     route: accountRoutes,
+
+  {
+    path: '/notifications',
+    route: notificationRouter,
+  },
+  {
+    path: '/newsletter',
+    route: newsLetterRouter,
+
   },
 ]
 
