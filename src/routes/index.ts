@@ -6,6 +6,8 @@ import blogRouter from './blog.router'
 import contactUsRouter from './contactUs.router'
 import visitBookingRouter from './visitBooking.router'
 import bookingRouter from './bookHome.route'
+import notificationRouter from './notification.route'
+import newsLetterRouter from './newsLetter.route'
 
 const router = Router()
 
@@ -38,6 +40,14 @@ const moduleRoutes = [
     path: '/bookings',
     route: bookingRouter,
   },
+  {
+    path: '/notification',
+    route: notificationRouter,
+  },
+  {
+    path: '/newsLetter',
+    route: newsLetterRouter,
+  }
 ]
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route))
