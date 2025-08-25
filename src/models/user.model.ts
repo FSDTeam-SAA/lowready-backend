@@ -24,6 +24,9 @@ const userSchema: Schema = new Schema<IUser>(
     postCode: { type: Number, default: null },
     phoneNum: { type: String, default: '' },
     dateOfBirth: { type: Date },
+    stripeAccountId:{type:String},
+    onboardingStatus:{type:Boolean,default:false},
+    accountLink:{type:String},
 
     // Keep extra fields you had earlier (if needed in your system)
     avatar: {
