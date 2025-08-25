@@ -9,7 +9,7 @@ const router = express.Router()
 
 router.post('/subscribe', subscribeNewsletter)
 router.post('/broadcast', 
-  // protect, isAdmin, 
+  protect, isAdmin, 
   broadcastNewsletter)
 
 export default router
