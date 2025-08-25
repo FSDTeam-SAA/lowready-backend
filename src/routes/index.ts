@@ -41,13 +41,13 @@ const moduleRoutes = [
     route: bookingRouter,
   },
   {
-    path: '/notification',
+    path: '/notifications',
     route: notificationRouter,
   },
   {
-    path: '/newsLetter',
+    path: '/newsletter',
     route: newsLetterRouter,
-  }
+  },
 ]
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route))

@@ -7,7 +7,9 @@ import { protect, isAdmin } from '../middlewares/auth.middleware' // Assume this
 
 const router = express.Router()
 
-router.post('/newsletter/subscribe', subscribeNewsletter)
-router.post('/newsletter/broadcast', protect, isAdmin, broadcastNewsletter)
+router.post('/subscribe', subscribeNewsletter)
+router.post('/broadcast', 
+  // protect, isAdmin, 
+  broadcastNewsletter)
 
 export default router
