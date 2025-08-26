@@ -15,7 +15,7 @@ const visitBookingSchema: Schema = new Schema<IVisitBooking>(
     facility: { type: Schema.Types.ObjectId, ref: "Facility" },
     visitDate: { type: Date, required: [true, "Visit date is required"] },
     visitTime: { type: String, required: [true, "Visit time is required"] },
-    rating: { type: Number, min: 1, max: 5, default: 0 },
+    rating: { type: Number, max: 5, default: 0 },
     status: {
       type: String,
       enum: ["upcoming", "completed", "cancelled"],

@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import userRoutes from "./routes/user.routes";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { notFound } from "./middlewares/notFound";
 import router from "./routes";
