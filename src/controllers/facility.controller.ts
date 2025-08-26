@@ -284,7 +284,10 @@ const updateFacility = catchAsync(async (req, res) => {
 const getSingleFacility = catchAsync(async (req, res) => {
   const { facilityId } = req.params;
 
-  const facility = await Facility.findById(facilityId);
+  const facility = await Facility.findById(facilityId).populate({
+    path: "userId",
+    select: "firstName lastName email phoneNumber",
+  });
   if (!facility) {
     throw new AppError(404, "Facility not found");
   }

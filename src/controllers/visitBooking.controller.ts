@@ -77,6 +77,10 @@ const getMyVisitBookings = catchAsync(async (req, res) => {
         path: "facility",
         select: "name location price images",
       })
+      .populate({
+        path: "userId",
+        select: "firstName lastName email phoneNumber",
+      })
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }),
