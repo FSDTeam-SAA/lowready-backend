@@ -15,23 +15,22 @@ export interface IFacility extends Document {
   userId: Types.ObjectId;
   images: string;
   base: "monthly" | "yearly";
-  services: string[]; // not sure about this
-  offers: string[];
-  amenities:
-    | "Room and Board (Private or Shared Rooms)"
-    | "Assistance with Activities of Daily Living"
-    | "Medication Management"
-    | "Meals and Nutrition"
-    | "Housekeeping and Laundry "
-    | "Transportation"
-    | "Social and Recreational Activities"
-    | "Health Monitoring and Coordination";
+  amenities: string[];
+  careServices:
+    | "Personal Care"
+    | "Directed Care"
+    | "Supervisory Care"
+    | "Memory Care"
+    | "Respite and Short Term Care"
+    | "Behavioral Care";
+  amenitiesServices: string[];
   about?: string;
   videoTitle?: string;
   videoDescription?: string;
   uploadVideo?: string[];
   availableTime: string[];
-  Medicaid: boolean; // not sure about this
+  facilityLicenseNumber?: string;
+  medicaidPrograms?: string[];
 }
 
 export interface FacilityModel extends Model<IFacility> {}

@@ -49,7 +49,39 @@ const createFacility = catchAsync(async (req, res) => {
       }
     }
 
-    let { services, availableTime, base, location, ...rest } = req.body;
+    // Handle medicaid programs
+    let medicaidPrograms: { public_id: string; url: string }[] = [];
+    if (files?.medical && files.medical.length > 0) {
+      for (const file of files.medical) {
+        const uploadResult = await uploadToCloudinary(file.path, "medical");
+        if (uploadResult) {
+          medicaidPrograms.push({
+            public_id: uploadResult.public_id,
+            url: uploadResult.secure_url,
+          });
+        }
+      }
+    }
+    console.log({ medicaidPrograms });
+
+    let {
+      services,
+      availableTime,
+      base,
+      location,
+      facilityLicenseNumber,
+      ...rest
+    } = req.body;
+
+    if (
+      (!facilityLicenseNumber || facilityLicenseNumber.trim() === "") &&
+      (!medicaidPrograms || medicaidPrograms.length === 0)
+    ) {
+      throw new AppError(
+        400,
+        "Facility License Number or medical Programs of at least one is required"
+      );
+    }
 
     if (!base) throw new AppError(400, "Base plan is required");
     if (!location) throw new AppError(400, "Location is required");
@@ -63,6 +95,8 @@ const createFacility = catchAsync(async (req, res) => {
       availableTime,
       images,
       uploadVideo,
+      facilityLicenseNumber,
+      medicaidPrograms,
     });
 
     return sendResponse(res, {
