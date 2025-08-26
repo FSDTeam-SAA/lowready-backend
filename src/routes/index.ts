@@ -54,6 +54,7 @@ const moduleRoutes = [
   {
     path: '/account',
     route: accountRoutes,
+  },
 
   {
     path: '/notifications',
