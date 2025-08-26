@@ -183,7 +183,12 @@ const getAllFacilities = catchAsync(async (req, res) => {
 
   const facilities = await Facility.find(filter)
     .skip(skip)
-    .limit(Number(limit));
+    .limit(Number(limit))
+    .populate({
+      path: "userId",
+      select: "firstName lastName email phoneNumber",
+    })
+    .sort({ createdAt: -1 });
 
   const total = await Facility.countDocuments(filter);
 
