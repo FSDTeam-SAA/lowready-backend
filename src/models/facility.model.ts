@@ -26,23 +26,23 @@ const facilitySchema: Schema = new Schema<IFacility>(
       enum: ["monthly", "yearly"],
       required: [true, "Select a base plan"],
     },
-    services: [{ type: String, required: [true, "Add at least one service"] }],
-    offers: [{ type: String, required: [true, "Add at least one offer"] }],
-    amenities: [
+    careServices: [
       {
         type: String,
         enum: [
-          "Room and Board (Private or Shared Rooms)",
-          "Assistance with Activities of Daily Living",
-          "Medication Management",
-          "Meals and Nutrition",
-          "Housekeeping and Laundry ",
-          "Transportation",
-          "Social and Recreational Activities",
-          "Health Monitoring and Coordination",
+          "Personal Care",
+          "Directed Care",
+          "Supervisory Care",
+          "Memory Care",
+          "Respite and Short Term Care",
+          "Behavioral Care",
         ],
         required: [true, "Select at least one amenity"],
       },
+    ],
+    amenities: [{ type: String, required: [true, "Amenity is required"] }],
+    amenitiesServices: [
+      { type: String, required: [true, "Service is required"] },
     ],
     about: { type: String, required: [true, "About is required"] },
     videoTitle: { type: String, required: [true, "Video title is required"] },
@@ -53,6 +53,19 @@ const facilitySchema: Schema = new Schema<IFacility>(
     uploadVideo: { type: String, default: "" },
     availableTime: [
       { type: String, required: [true, "Available time is required"] },
+    ],
+    facilityLicenseNumber: {
+      type: String,
+    },
+    medicaidPrograms: [
+      {
+        public_id: {
+          type: String,
+          default: "",
+        },
+        url: { type: String, default: "" },
+      },
+      { _id: false },
     ],
   },
   { timestamps: true }

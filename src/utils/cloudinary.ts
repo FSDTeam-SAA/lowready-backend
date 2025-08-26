@@ -17,6 +17,8 @@ export const uploadToCloudinary = async (filePath: string, folder: string) => {
       resource_type: "auto",
     });
 
+    console.log(result);
+
     // delete local file after upload
     fs.unlinkSync(filePath);
 
@@ -25,6 +27,7 @@ export const uploadToCloudinary = async (filePath: string, folder: string) => {
       secure_url: result.secure_url,
     };
   } catch (error) {
+    console.log("cloudinary error", { error });
     throw new Error("Failed to upload file to Cloudinary");
   }
 };
