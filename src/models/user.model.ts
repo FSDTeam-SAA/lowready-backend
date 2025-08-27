@@ -23,7 +23,7 @@ const userSchema: Schema = new Schema<IUser>(
     street: { type: String, default: '' },
     postCode: { type: Number, default: null },
     phoneNum: { type: String, default: '' },
-    dateOfBirth: { type: Date },
+    // dateOfBirth: { type: Date },
 
     // Keep extra fields you had earlier (if needed in your system)
     avatar: {

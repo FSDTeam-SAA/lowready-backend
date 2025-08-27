@@ -187,6 +187,10 @@ const addFeedback = catchAsync(async (req, res) => {
   const { bookingId } = req.params;
   const { feedback, rating } = req.body;
 
+  if (!feedback || !rating) {
+    throw new AppError(400, "Feedback and rating are required");
+  }
+
   const visitBooking = await VisitBooking.findById(bookingId);
   if (!visitBooking) throw new AppError(404, "Visit booking not found");
 
@@ -212,11 +216,60 @@ const addFeedback = catchAsync(async (req, res) => {
   });
 });
 
+const rescheduleVisitBooking = catchAsync(async (req, res) => {
+  const { bookingId } = req.params;
+  const { visitDate, visitTime } = req.body;
+
+  const visitBooking = await VisitBooking.findById(bookingId);
+  if (!visitBooking) throw new AppError(404, "Visit booking not found");
+
+  const facility = await Facility.findById(visitBooking.facility);
+  if (!facility) throw new AppError(404, "Facility not found");
+
+  const result = await VisitBooking.findByIdAndUpdate(
+    bookingId,
+    { visitDate, visitTime },
+    { new: true }
+  )
+    .populate({
+      path: "facility",
+      select: "name location price images",
+    })
+    .populate({
+      path: "userId",
+      select: "firstName lastName email phoneNumber",
+    });
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Visit booking rescheduled successfully",
+    data: result,
+  });
+});
+
+const deleteVisitBooking = catchAsync(async (req, res) => {
+  const { bookingId } = req.params;
+
+  const visitBooking = await VisitBooking.findById(bookingId);
+  if (!visitBooking) throw new AppError(404, "Visit booking not found");
+
+  await VisitBooking.findByIdAndDelete(bookingId);
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Visit booking deleted successfully",
+  });
+});
+
 const visitBookingController = {
   createVisitBooking,
   getMyVisitBookings,
   getMyFacilityBookings,
   updateVisitBookingStatus,
   addFeedback,
+  rescheduleVisitBooking,
+  deleteVisitBooking,
 };
 export default visitBookingController;

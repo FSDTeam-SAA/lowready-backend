@@ -43,5 +43,19 @@ router.put(
   visitBookingController.addFeedback
 );
 
+router.put(
+  "/reschedule/:bookingId",
+  protect,
+  isUser,
+  visitBookingController.rescheduleVisitBooking
+);
+
+router.delete(
+  "/:bookingId",
+  protect,
+  isUser,
+  visitBookingController.deleteVisitBooking
+);
+
 const visitBookingRouter = router;
 export default visitBookingRouter;
