@@ -4,8 +4,9 @@ import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { notFound } from "./middlewares/notFound";
 import router from "./routes";
 import cookieParser from "cookie-parser";
-
+import { stripeWebhook } from "./controllers/serviceProviderAccount.controller";
 const app = express();
+app.post('/api/v1/webhook', express.raw({ type: '*/*' }),stripeWebhook);
 
 app.use(express.json());
 app.use(cookieParser());
