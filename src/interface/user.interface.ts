@@ -14,6 +14,9 @@ export interface IUser extends Document {
   phoneNum?: string
   dateOfBirth?: Date
   avatars?: string
+  stripeAccountId?:string
+  onboardingStatus?:boolean 
+  accountLink?:string
 
   // Extra fields
   avatar?: {
