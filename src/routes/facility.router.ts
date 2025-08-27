@@ -12,6 +12,7 @@ router.post(
   upload.fields([
     { name: "image", maxCount: 5 },
     { name: "medical", maxCount: 5 },
+    { name: "amenitiesServices", maxCount: 10 },
     { name: "video", maxCount: 1 },
   ]),
   facilityController.createFacility

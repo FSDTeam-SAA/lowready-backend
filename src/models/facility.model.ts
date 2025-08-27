@@ -42,7 +42,14 @@ const facilitySchema: Schema = new Schema<IFacility>(
     ],
     amenities: [{ type: String, required: [true, "Amenity is required"] }],
     amenitiesServices: [
-      { type: String, required: [true, "Service is required"] },
+      {
+        name: { type: String, required: [true, "Name is required"] },
+        image: {
+          public_id: { type: String, default: "" },
+          url: { type: String, default: "" },
+        },
+        _id: false,
+      },
     ],
     about: { type: String, required: [true, "About is required"] },
     videoTitle: { type: String, required: [true, "Video title is required"] },
