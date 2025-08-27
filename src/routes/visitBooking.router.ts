@@ -57,5 +57,7 @@ router.delete(
   visitBookingController.deleteVisitBooking
 );
 
+router.get("/:userId", visitBookingController.getSingleUserVisitBooking);
+
 const visitBookingRouter = router;
 export default visitBookingRouter;
