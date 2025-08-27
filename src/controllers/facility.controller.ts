@@ -14,11 +14,6 @@ const createFacility = catchAsync(async (req, res) => {
       throw new AppError(404, "User not found");
     }
 
-    const alreadyHasFacility = await Facility.findOne({ userId });
-    if (alreadyHasFacility) {
-      throw new AppError(400, "You already have a facility");
-    }
-
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     // ---------------- Images ----------------
@@ -234,27 +229,26 @@ const updateFacility = catchAsync(async (req, res) => {
     const { _id: userId } = req.user as any;
 
     const user = await User.findById(userId);
-    if (!user) {
-      throw new AppError(404, "User not found");
-    }
+    if (!user) throw new AppError(404, "User not found");
 
     const facility = await Facility.findOne({ userId });
-    if (!facility) {
-      throw new AppError(404, "Facility not found");
-    }
+    if (!facility) throw new AppError(404, "Facility not found");
 
     if (facility.userId.toString() !== userId.toString()) {
       throw new AppError(403, "You are not authorized to update this facility");
     }
 
-    // Handle images
-    let images: { public_id: string; url: string }[] = [];
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    if (files?.image && files.image.length > 0) {
+    const files = req.files as {
+      [fieldname: string]: Express.Multer.File[];
+    };
+
+    // ---------------- Upload New Images ----------------
+    const newImages: { public_id: string; url: string }[] = [];
+    if (files?.image?.length) {
       for (const file of files.image) {
         const uploadResult = await uploadToCloudinary(file.path, "facilities");
         if (uploadResult) {
-          images.push({
+          newImages.push({
             public_id: uploadResult.public_id,
             url: uploadResult.secure_url,
           });
@@ -262,24 +256,118 @@ const updateFacility = catchAsync(async (req, res) => {
       }
     }
 
-    // // If you want image to be optional → comment this block
-    // if (images.length === 0 && facility.images.length === 0) {
-    //   throw new AppError(400, "At least one image is required");
-    // }
-
-    // Handle single video
-    let uploadVideo = "";
-    if (files?.video && files.video.length > 0) {
+    // ---------------- Upload New Video ----------------
+    let newUploadVideo = "";
+    if (files?.video?.length) {
       const uploadResult = await uploadToCloudinary(
         files.video[0].path,
         "facilities"
       );
-      if (uploadResult) {
-        uploadVideo = uploadResult.secure_url;
+      if (uploadResult) newUploadVideo = uploadResult.secure_url;
+    }
+
+    // ---------------- Upload Medicaid Files ----------------
+    const newMedicaidPrograms: { public_id: string; url: string }[] = [];
+    if (files?.medical?.length) {
+      for (const file of files.medical) {
+        const uploadResult = await uploadToCloudinary(file.path, "medical");
+        if (uploadResult) {
+          newMedicaidPrograms.push({
+            public_id: uploadResult.public_id,
+            url: uploadResult.secure_url,
+          });
+        }
       }
     }
 
-    let { services, availableTime, base, location, ...rest } = req.body;
+    // ---------------- Upload Amenities Services ----------------
+    const newAmenitiesServices: {
+      name: string;
+      image: { public_id: string; url: string };
+    }[] = [];
+
+    const names = req.body.amenitiesServicesName;
+
+    if (files?.amenitiesServices?.length) {
+      for (let i = 0; i < files.amenitiesServices.length; i++) {
+        const file = files.amenitiesServices[i];
+        const uploadResult = await uploadToCloudinary(file.path, "amenities");
+        if (uploadResult) {
+          const name = Array.isArray(names)
+            ? names[i]
+            : typeof names === "string"
+            ? names
+            : "Amenities Service";
+
+          newAmenitiesServices.push({
+            name,
+            image: {
+              public_id: uploadResult.public_id,
+              url: uploadResult.secure_url,
+            },
+          });
+        }
+      }
+    }
+
+    // ---------------- Optional Removals ----------------
+    const {
+      deleteImageIds,
+      deleteAmenitiesServiceNames,
+      deleteVideo,
+      deleteMedicaidIds,
+    } = req.body;
+
+    const imageIdsToDelete: string[] =
+      typeof deleteImageIds === "string"
+        ? deleteImageIds.split(",")
+        : Array.isArray(deleteImageIds)
+        ? deleteImageIds
+        : [];
+
+    const amenityNamesToDelete: string[] =
+      typeof deleteAmenitiesServiceNames === "string"
+        ? deleteAmenitiesServiceNames.split(",")
+        : Array.isArray(deleteAmenitiesServiceNames)
+        ? deleteAmenitiesServiceNames
+        : [];
+
+    const medicaidIdsToDelete: string[] =
+      typeof deleteMedicaidIds === "string"
+        ? deleteMedicaidIds.split(",")
+        : Array.isArray(deleteMedicaidIds)
+        ? deleteMedicaidIds
+        : [];
+
+    const updatedImages = Array.isArray(facility.images)
+      ? facility.images.filter(
+          (img: any) => !imageIdsToDelete.includes(img.public_id)
+        )
+      : [];
+
+    const updatedAmenitiesServices = Array.isArray(facility.amenitiesServices)
+      ? facility.amenitiesServices.filter(
+          (s: any) => !amenityNamesToDelete.includes(s.name)
+        )
+      : [];
+
+    const updatedMedicaid = Array.isArray(facility.medicaidPrograms)
+      ? facility.medicaidPrograms.filter(
+          (file: any) => !medicaidIdsToDelete.includes(file.public_id)
+        )
+      : [];
+
+    const updatedVideo = deleteVideo === "true" ? "" : facility.uploadVideo;
+
+    // ---------------- Update Basic Fields ----------------
+    const {
+      services,
+      availableTime,
+      base,
+      location,
+      facilityLicenseNumber,
+      ...rest
+    } = req.body;
 
     const updatedFacility = await Facility.findByIdAndUpdate(
       facility._id,
@@ -290,9 +378,14 @@ const updateFacility = catchAsync(async (req, res) => {
         location,
         services,
         availableTime,
-        images:
-          images.length > 0 ? [...facility.images, ...images] : facility.images,
-        uploadVideo: uploadVideo || facility.uploadVideo,
+        images: [...updatedImages, ...newImages],
+        uploadVideo: newUploadVideo || updatedVideo,
+        facilityLicenseNumber,
+        medicaidPrograms: [...updatedMedicaid, ...newMedicaidPrograms],
+        amenitiesServices: [
+          ...updatedAmenitiesServices,
+          ...newAmenitiesServices,
+        ],
       },
       { new: true, runValidators: true }
     );
@@ -304,7 +397,7 @@ const updateFacility = catchAsync(async (req, res) => {
       data: updatedFacility,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw new AppError(500, "Failed to update facility");
   }
 });
