@@ -120,10 +120,6 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
   const [result, total] = await Promise.all([
     VisitBooking.find({ facility: facility._id })
       .populate({
-        path: "facility",
-        select: "name location price images",
-      })
-      .populate({
         path: "userId",
         select: "firstName lastName email phoneNumber",
       })
@@ -263,6 +259,22 @@ const deleteVisitBooking = catchAsync(async (req, res) => {
   });
 });
 
+const getSingleUserVisitBooking = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(404, "User not found");
+
+  const result = await VisitBooking.find({ userId: userId }).populate("userId");
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Your Visit Bookings retrieved successfully",
+    data: result,
+  });
+});
+
 const visitBookingController = {
   createVisitBooking,
   getMyVisitBookings,
@@ -271,5 +283,6 @@ const visitBookingController = {
   addFeedback,
   rescheduleVisitBooking,
   deleteVisitBooking,
+  getSingleUserVisitBooking,
 };
 export default visitBookingController;
