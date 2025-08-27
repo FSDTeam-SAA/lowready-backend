@@ -21,7 +21,7 @@ const createFacility = catchAsync(async (req, res) => {
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    // Handle images
+    // ---------------- Images ----------------
     let images: { public_id: string; url: string }[] = [];
     if (files?.image && files.image.length > 0) {
       for (const file of files.image) {
@@ -37,32 +37,53 @@ const createFacility = catchAsync(async (req, res) => {
       throw new AppError(400, "At least one image is required");
     }
 
-    // Handle single video
+    // ---------------- Video ----------------
     let uploadVideo = "";
     if (files?.video && files.video.length > 0) {
       const uploadResult = await uploadToCloudinary(
         files.video[0].path,
         "facilities"
       );
-      if (uploadResult) {
-        uploadVideo = uploadResult.secure_url;
-      }
+      if (uploadResult) uploadVideo = uploadResult.secure_url;
     }
 
-    // Handle medicaid programs
+    // ---------------- Medicaid Programs ----------------
     let medicaidPrograms: { public_id: string; url: string }[] = [];
     if (files?.medical && files.medical.length > 0) {
       for (const file of files.medical) {
         const uploadResult = await uploadToCloudinary(file.path, "medical");
-        if (uploadResult) {
+        if (uploadResult)
           medicaidPrograms.push({
             public_id: uploadResult.public_id,
             url: uploadResult.secure_url,
+          });
+      }
+    }
+
+    // ---------------- Amenities Services ----------------
+    let amenitiesServices: {
+      name: string;
+      image: { public_id: string; url: string };
+    }[] = [];
+    if (files?.amenitiesServices && files.amenitiesServices.length > 0) {
+      for (let i = 0; i < files.amenitiesServices.length; i++) {
+        const file = files.amenitiesServices[i];
+        const uploadResult = await uploadToCloudinary(file.path, "amenities");
+        if (uploadResult) {
+          amenitiesServices.push({
+            name: Array.isArray(req.body.amenitiesServicesName)
+              ? req.body.amenitiesServicesName[i]
+              : req.body.amenitiesServicesName || "Amenities Service",
+            image: {
+              public_id: uploadResult.public_id,
+              url: uploadResult.secure_url,
+            },
           });
         }
       }
     }
 
+    // ---------------- Body Fields ----------------
     let {
       services,
       availableTime,
@@ -72,19 +93,20 @@ const createFacility = catchAsync(async (req, res) => {
       ...rest
     } = req.body;
 
+    // ---------------- Validation ----------------
     if (
       (!facilityLicenseNumber || facilityLicenseNumber.trim() === "") &&
       (!medicaidPrograms || medicaidPrograms.length === 0)
     ) {
       throw new AppError(
         400,
-        "Facility License Number or medical Programs of at least one is required"
+        "Facility License Number or Medicaid Programs of at least one is required"
       );
     }
-
     if (!base) throw new AppError(400, "Base plan is required");
     if (!location) throw new AppError(400, "Location is required");
 
+    // ---------------- Create Facility ----------------
     const facility = await Facility.create({
       ...rest,
       userId,
@@ -96,6 +118,7 @@ const createFacility = catchAsync(async (req, res) => {
       uploadVideo,
       facilityLicenseNumber,
       medicaidPrograms,
+      amenitiesServices,
     });
 
     return sendResponse(res, {
