@@ -40,20 +40,35 @@ export const getAllReviews = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-/***********************************
- * // ✅ GET REVIEWS BY FACILITYID *
- ***********************************/
 export const getReviewsByFacility = catchAsync(
   async (req: Request, res: Response) => {
     const { facilityId } = req.params;
 
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Fetch reviews with pagination
     const reviews = await ReviewRating.find({ facility: facilityId })
       .populate("userId", "firstName lastName email")
-      .populate("facility", "name address");
+      .populate("facility", "name address")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 }); // newest first
 
-    res.status(httpStatus.OK).json({
+    // Count total reviews for this facility
+    const total = await ReviewRating.countDocuments({ facility: facilityId });
+
+    return sendResponse(res, {
+      statusCode: httpStatus.OK,
       success: true,
-      total: reviews.length,
+      message: "Reviews fetched successfully",
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
       data: reviews,
     });
   }
