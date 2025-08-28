@@ -74,6 +74,12 @@ const facilitySchema: Schema = new Schema<IFacility>(
       },
       { _id: false },
     ],
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+      default: 0,
+    }
   },
   { timestamps: true }
 );

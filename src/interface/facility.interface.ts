@@ -17,12 +17,12 @@ export interface IFacility extends Document {
   base: "monthly" | "yearly";
   amenities: string[];
   careServices:
-    | "Personal Care"
-    | "Directed Care"
-    | "Supervisory Care"
-    | "Memory Care"
-    | "Respite and Short Term Care"
-    | "Behavioral Care";
+  | "Personal Care"
+  | "Directed Care"
+  | "Supervisory Care"
+  | "Memory Care"
+  | "Respite and Short Term Care"
+  | "Behavioral Care";
   amenitiesServices: string[];
   about?: string;
   videoTitle?: string;
@@ -31,6 +31,7 @@ export interface IFacility extends Document {
   availableTime: string[];
   facilityLicenseNumber?: string;
   medicaidPrograms?: string[];
+  rating?: number;
 }
 
-export interface FacilityModel extends Model<IFacility> {}
+export interface FacilityModel extends Model<IFacility> { }

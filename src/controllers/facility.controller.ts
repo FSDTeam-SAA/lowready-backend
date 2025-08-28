@@ -85,6 +85,7 @@ const createFacility = catchAsync(async (req, res) => {
       base,
       location,
       facilityLicenseNumber,
+      rating,
       ...rest
     } = req.body;
 
@@ -114,6 +115,7 @@ const createFacility = catchAsync(async (req, res) => {
       facilityLicenseNumber,
       medicaidPrograms,
       amenitiesServices,
+      rating,
     });
 
     return sendResponse(res, {
@@ -152,13 +154,14 @@ const getAllFacilities = catchAsync(async (req, res) => {
     maxPrice,
     careServices,
     amenities,
+    rating,   // 👈 added here
     page = 1,
     limit = 10,
   } = req.query;
 
   const filter: any = {};
 
-  // 🔎 Search by name or location (case-insensitive + trim)
+  // 🔎 Search by name or location
   if (search) {
     const searchValue = (search as string).trim();
     filter.$or = [
@@ -167,7 +170,7 @@ const getAllFacilities = catchAsync(async (req, res) => {
     ];
   }
 
-  // 📍 Filter by location (case-insensitive + trim)
+  // 📍 Location filter
   if (location) {
     const locationValue = (location as string).trim();
     filter.location = { $regex: locationValue, $options: "i" };
@@ -180,7 +183,7 @@ const getAllFacilities = catchAsync(async (req, res) => {
     if (maxPrice) filter.price.$lte = Number(maxPrice);
   }
 
-  // 🏥 Filter by careServices (array contains)
+  // 🏥 Care services filter
   if (careServices) {
     const servicesArray = (careServices as string)
       .split(",")
@@ -188,12 +191,23 @@ const getAllFacilities = catchAsync(async (req, res) => {
     filter.careServices = { $in: servicesArray };
   }
 
-  // 🛎️ Filter by amenities (array contains)
+  // 🛎️ Amenities filter
   if (amenities) {
     const amenitiesArray = (amenities as string)
       .split(",")
       .map((a) => a.trim());
     filter.amenities = { $in: amenitiesArray };
+  }
+
+  // ⭐ Rating filter (1,2,3,4,5 but works with decimals)
+  if (rating) {
+    const ratingValue = Number(rating);
+    if (!isNaN(ratingValue) && ratingValue >= 1 && ratingValue <= 5) {
+      filter.rating = {
+        $gte: ratingValue,
+        $lt: ratingValue + 1,
+      };
+    }
   }
 
   // 📄 Pagination
@@ -223,6 +237,7 @@ const getAllFacilities = catchAsync(async (req, res) => {
     data: facilities,
   });
 });
+
 
 const updateFacility = catchAsync(async (req, res) => {
   try {
@@ -296,8 +311,8 @@ const updateFacility = catchAsync(async (req, res) => {
           const name = Array.isArray(names)
             ? names[i]
             : typeof names === "string"
-            ? names
-            : "Amenities Service";
+              ? names
+              : "Amenities Service";
 
           newAmenitiesServices.push({
             name,
@@ -322,39 +337,39 @@ const updateFacility = catchAsync(async (req, res) => {
       typeof deleteImageIds === "string"
         ? deleteImageIds.split(",")
         : Array.isArray(deleteImageIds)
-        ? deleteImageIds
-        : [];
+          ? deleteImageIds
+          : [];
 
     const amenityNamesToDelete: string[] =
       typeof deleteAmenitiesServiceNames === "string"
         ? deleteAmenitiesServiceNames.split(",")
         : Array.isArray(deleteAmenitiesServiceNames)
-        ? deleteAmenitiesServiceNames
-        : [];
+          ? deleteAmenitiesServiceNames
+          : [];
 
     const medicaidIdsToDelete: string[] =
       typeof deleteMedicaidIds === "string"
         ? deleteMedicaidIds.split(",")
         : Array.isArray(deleteMedicaidIds)
-        ? deleteMedicaidIds
-        : [];
+          ? deleteMedicaidIds
+          : [];
 
     const updatedImages = Array.isArray(facility.images)
       ? facility.images.filter(
-          (img: any) => !imageIdsToDelete.includes(img.public_id)
-        )
+        (img: any) => !imageIdsToDelete.includes(img.public_id)
+      )
       : [];
 
     const updatedAmenitiesServices = Array.isArray(facility.amenitiesServices)
       ? facility.amenitiesServices.filter(
-          (s: any) => !amenityNamesToDelete.includes(s.name)
-        )
+        (s: any) => !amenityNamesToDelete.includes(s.name)
+      )
       : [];
 
     const updatedMedicaid = Array.isArray(facility.medicaidPrograms)
       ? facility.medicaidPrograms.filter(
-          (file: any) => !medicaidIdsToDelete.includes(file.public_id)
-        )
+        (file: any) => !medicaidIdsToDelete.includes(file.public_id)
+      )
       : [];
 
     const updatedVideo = deleteVideo === "true" ? "" : facility.uploadVideo;
