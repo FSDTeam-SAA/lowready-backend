@@ -27,6 +27,8 @@ router.get(
 
 router.get("/all", facilityController.getAllFacilities);
 router.get("/locations", facilityController.getAllFacilitiesLocations);
+router.get("/summary/:facilityId", protect,
+  isOrganization, facilityController.facilityDashboardSummary);
 
 router.put(
   "/update/my-facility",

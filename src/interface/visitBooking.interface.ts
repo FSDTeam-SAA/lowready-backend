@@ -16,4 +16,4 @@ export interface IVisitBooking extends Document {
   feedback?: string;
 }
 
-export interface VisitBookingModel extends Model<IVisitBooking> {}
+export interface VisitBookingModel extends Model<IVisitBooking> { }
