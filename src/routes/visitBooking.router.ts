@@ -37,6 +37,13 @@ router.put(
 );
 
 router.put(
+  "/status-cancel/:bookingId",
+  protect,
+  isOrganization,
+  visitBookingController.updateCancelVisitBookingStatus
+);
+
+router.put(
   "/feedback/:bookingId",
   protect,
   isUser,
