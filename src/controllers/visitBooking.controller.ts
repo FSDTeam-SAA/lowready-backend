@@ -151,10 +151,10 @@ const updateVisitBookingStatus = catchAsync(async (req, res) => {
   const visitBooking = await VisitBooking.findById(bookingId);
   if (!visitBooking) throw new AppError(404, "Visit booking not found");
 
-  const validStatuses = ["upcoming", "completed", "cancelled"];
-  if (!validStatuses.includes(status)) {
-    throw new AppError(400, "Invalid status value");
-  }
+  // const validStatuses = ["upcoming", "completed", "cancelled"];
+  // if (!validStatuses.includes(status)) {
+  //   throw new AppError(400, "Invalid status value");
+  // }
 
   const result = await VisitBooking.findByIdAndUpdate(
     bookingId,
