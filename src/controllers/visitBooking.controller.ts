@@ -117,11 +117,13 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
 
-  // ✅ Filter by status
+  // ✅ Filter by status (support "all")
   const { status } = req.query;
   const filter: any = { facility: facility._id };
+
   if (
     status &&
+    status !== "all" && // 🔥 If "all" → don't filter
     ["upcoming", "completed", "cancelled"].includes(status as string)
   ) {
     filter.status = status;
@@ -154,6 +156,7 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
     },
   });
 });
+
 
 
 const updateVisitBookingStatus = catchAsync(async (req, res) => {
