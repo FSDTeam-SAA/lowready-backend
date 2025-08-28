@@ -86,6 +86,7 @@ const createFacility = catchAsync(async (req, res) => {
       location,
       facilityLicenseNumber,
       rating,
+      address,
       ...rest
     } = req.body;
 
@@ -108,6 +109,7 @@ const createFacility = catchAsync(async (req, res) => {
       userId,
       base,
       location,
+      address,
       services,
       availableTime,
       images,
@@ -237,7 +239,6 @@ const getAllFacilities = catchAsync(async (req, res) => {
     data: facilities,
   });
 });
-
 
 const updateFacility = catchAsync(async (req, res) => {
   try {
@@ -436,11 +437,25 @@ const getSingleFacility = catchAsync(async (req, res) => {
   });
 });
 
+const getAllFacilitiesLocations = catchAsync(async (req, res) => {
+  const facilities = await Facility.find().select('location');
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Facilities locations retrieved successfully",
+    data: facilities,
+  });
+})
+
+
+
 const facilityController = {
   createFacility,
   getMyFacilities,
   getAllFacilities,
   updateFacility,
   getSingleFacility,
+  getAllFacilitiesLocations
 };
 export default facilityController;

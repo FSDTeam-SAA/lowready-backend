@@ -26,6 +26,7 @@ router.get(
 );
 
 router.get("/all", facilityController.getAllFacilities);
+router.get("/locations", facilityController.getAllFacilitiesLocations);
 
 router.put(
   "/update/my-facility",
