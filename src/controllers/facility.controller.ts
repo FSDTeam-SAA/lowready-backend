@@ -1,6 +1,9 @@
+import mongoose from "mongoose";
 import AppError from "../errors/AppError";
+import { BookHome } from "../models/bookHome.model";
 import { Facility } from "../models/facility.model";
 import { User } from "../models/user.model";
+import { VisitBooking } from "../models/visitBooking.model";
 import catchAsync from "../utils/catchAsync";
 import { uploadToCloudinary } from "../utils/cloudinary";
 import sendResponse from "../utils/sendResponse";
@@ -453,6 +456,44 @@ const getAllFacilitiesLocations = catchAsync(async (req, res) => {
 })
 
 
+const facilityDashboardSummary = catchAsync(async (req, res) => {
+  const { _id: userId } = req.user as any;
+  const { facilityId } = req.params;
+
+
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(404, "User not found");
+
+  const facilities = await Facility.find({
+    userId,
+    _id: new mongoose.Types.ObjectId(facilityId), // ensure ObjectId match
+  });
+
+  if (!facilities || facilities.length === 0) {
+    throw new AppError(404, "Facility not found");
+  }
+
+  const visitTour = await VisitBooking.countDocuments({ facility: facilityId });
+  const facilityBookings = await BookHome.countDocuments({ facility: facilityId });
+
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Facilities retrieved successfully",
+    data: {
+      visitTour,
+      facilityBookings,
+    },
+  });
+});
+
+
+
+
+
+
+
 
 const facilityController = {
   createFacility,
@@ -460,6 +501,7 @@ const facilityController = {
   getAllFacilities,
   updateFacility,
   getSingleFacility,
-  getAllFacilitiesLocations
+  getAllFacilitiesLocations,
+  facilityDashboardSummary
 };
 export default facilityController;
