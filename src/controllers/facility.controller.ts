@@ -382,6 +382,8 @@ const updateFacility = catchAsync(async (req, res) => {
       base,
       location,
       facilityLicenseNumber,
+      rating,
+      address,
       ...rest
     } = req.body;
 
@@ -394,6 +396,8 @@ const updateFacility = catchAsync(async (req, res) => {
         location,
         services,
         availableTime,
+        rating,
+        address,
         images: [...updatedImages, ...newImages],
         uploadVideo: newUploadVideo || updatedVideo,
         facilityLicenseNumber,
