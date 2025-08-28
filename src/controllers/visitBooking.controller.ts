@@ -147,7 +147,6 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
 
 const updateVisitBookingStatus = catchAsync(async (req, res) => {
   const { bookingId } = req.params;
-  const { status } = req.body;
 
   const visitBooking = await VisitBooking.findById(bookingId);
   if (!visitBooking) throw new AppError(404, "Visit booking not found");
@@ -159,7 +158,34 @@ const updateVisitBookingStatus = catchAsync(async (req, res) => {
 
   const result = await VisitBooking.findByIdAndUpdate(
     bookingId,
-    { status },
+    { status: "completed" },
+    { new: true }
+  )
+    .populate({
+      path: "facility",
+      select: "name location price images",
+    })
+    .populate({
+      path: "userId",
+      select: "firstName lastName email phoneNumber",
+    });
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Visit booking status updated successfully",
+    data: result,
+  });
+});
+
+const updateCancelVisitBookingStatus = catchAsync(async (req, res) => {
+  const { bookingId } = req.params;
+  const visitBooking = await VisitBooking.findById(bookingId);
+  if (!visitBooking) throw new AppError(404, "Visit booking not found");
+
+  const result = await VisitBooking.findByIdAndUpdate(
+    bookingId,
+    { status: "cancelled" },
     { new: true }
   )
     .populate({
@@ -280,6 +306,7 @@ const visitBookingController = {
   getMyVisitBookings,
   getMyFacilityBookings,
   updateVisitBookingStatus,
+  updateCancelVisitBookingStatus,
   addFeedback,
   rescheduleVisitBooking,
   deleteVisitBooking,
