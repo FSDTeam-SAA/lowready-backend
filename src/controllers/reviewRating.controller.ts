@@ -5,10 +5,9 @@ import catchAsync from "../utils/catchAsync";
 import AppError from "../errors/AppError";
 import sendResponse from "../utils/sendResponse";
 import mongoose from "mongoose";
+import { Facility } from "../models/facility.model";
 
-/*************************
- * //CREATE A NEW REVIEW *
- *************************/
+
 export const createReview = catchAsync(async (req: Request, res: Response) => {
   const { userId, facility, star, comment } = req.body;
 
@@ -18,16 +17,33 @@ export const createReview = catchAsync(async (req: Request, res: Response) => {
 
   const review = await ReviewRating.create({ userId, facility, star, comment });
 
+  const stats = await ReviewRating.aggregate([
+    { $match: { facility: new mongoose.Types.ObjectId(facility) } },
+    {
+      $group: {
+        _id: "$facility",
+        avgRating: { $avg: "$star" }
+      }
+    }
+  ]);
+
+  let newAvgRating = stats.length > 0 ? stats[0].avgRating : 0;
+
+  newAvgRating = Number(newAvgRating.toFixed(1));
+  await Facility.findByIdAndUpdate(facility, { rating: newAvgRating });
+
   res.status(httpStatus.CREATED).json({
     success: true,
     message: "Review created successfully",
-    data: review,
+    data: {
+      review,
+      rating: newAvgRating
+    }
   });
 });
 
-/***********************
- * //  GET ALL REVIEWS *
- ***********************/
+
+
 export const getAllReviews = catchAsync(async (req: Request, res: Response) => {
   const reviews = await ReviewRating.find()
     .populate("userId", "firstName lastName email")
@@ -91,12 +107,34 @@ export const updateReview = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(httpStatus.NOT_FOUND, "Review not found");
   }
 
+  const stats = await ReviewRating.aggregate([
+    { $match: { facility: updatedReview.facility } },
+    {
+      $group: {
+        _id: "$facility",
+        avgRating: { $avg: "$star" }
+      }
+    }
+  ]);
+
+  let newAvgRating = stats.length > 0 ? stats[0].avgRating : 0;
+
+  newAvgRating = Number(newAvgRating.toFixed(1));
+
+  await Facility.findByIdAndUpdate(updatedReview.facility, {
+    rating: newAvgRating
+  });
+
   res.status(httpStatus.OK).json({
     success: true,
     message: "Review updated successfully",
-    data: updatedReview,
+    data: {
+      review: updatedReview,
+      rating: newAvgRating
+    }
   });
 });
+
 
 /********************
  * // DELETE REVIEW *

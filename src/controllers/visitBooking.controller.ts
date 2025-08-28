@@ -158,7 +158,6 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
 });
 
 
-
 const updateVisitBookingStatus = catchAsync(async (req, res) => {
   const { bookingId } = req.params;
 
