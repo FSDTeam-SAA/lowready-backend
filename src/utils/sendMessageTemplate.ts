@@ -14,7 +14,7 @@ const sendMessageTemplate = ({
       <div style="background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06); overflow: hidden;">
         
         <header style="padding: 24px 32px; border-bottom: 1px solid #e5e7eb; background-color: #ffffff; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px; color: #111827;">AlhiiHub</h1>
+          <h1 style="margin: 0; font-size: 24px; color: #111827;">AlhHub</h1>
           <p style="margin-top: 6px; font-size: 14px; color: #6b7280;">New message received via contact form</p>
         </header>
 
@@ -35,8 +35,8 @@ const sendMessageTemplate = ({
         </section>
 
         <footer style="padding: 20px 32px; background-color: #fafafa; border-top: 1px solid #e5e7eb; text-align: center; font-size: 13px; color: #6b7280;">
-          This message was sent via the <strong>AlhiiHub</strong> contact form.<br/>
-          &copy; 2025 AlhiiHub. All rights reserved.
+          This message was sent via the <strong>AlhHub</strong> contact form.<br/>
+          &copy; 2025 AlhHub. All rights reserved.
         </footer>
 
       </div>
