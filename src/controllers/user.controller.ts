@@ -38,6 +38,18 @@ export const register = catchAsync(async (req, res) => {
     );
   }
 
+  if (role === "admin") {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You are not allowed to register as admin"
+    );
+  }
+
+  const userExists = await User.isUserExistsByEmail(email);
+  if (userExists) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User already exists");
+  }
+
   // Generate OTP
   const otp = generateOTP();
   const jwtPayloadOTP = { otp };
