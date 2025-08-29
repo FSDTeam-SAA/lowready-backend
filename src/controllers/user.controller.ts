@@ -1,5 +1,3 @@
-import path from "path";
-import fs from "fs";
 
 import catchAsync from "../utils/catchAsync";
 import AppError from "../errors/AppError";
@@ -11,8 +9,6 @@ import { User } from "../models/user.model";
 import sendResponse from "../utils/sendResponse";
 import { JwtPayload } from "jsonwebtoken";
 import { Request, Response } from "express";
-
-import { getPaginationParams, buildMetaPagination } from "../utils/pagination";
 import { deleteFromCloudinary, uploadToCloudinary } from "../utils/cloudinary";
 
 export const register = catchAsync(async (req, res) => {
