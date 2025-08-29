@@ -245,17 +245,20 @@ const getAllFacilities = catchAsync(async (req, res) => {
 
 const updateFacility = catchAsync(async (req, res) => {
   try {
-    const { _id: userId } = req.user as any;
+    // const { _id: userId } = req.user as any;
 
-    const user = await User.findById(userId);
-    if (!user) throw new AppError(404, "User not found");
+    // const user = await User.findById(userId);
+    // if (!user) throw new AppError(404, "User not found");
+    const { facilityId } = req.params;
 
-    const facility = await Facility.findOne({ userId });
-    if (!facility) throw new AppError(404, "Facility not found");
-
-    if (facility.userId.toString() !== userId.toString()) {
-      throw new AppError(403, "You are not authorized to update this facility");
+    const facility = await Facility.findById(facilityId);
+    if (!facility) {
+      throw new AppError(404, "Facility not found");
     }
+
+    // if (facility.userId.toString() !== userId.toString()) {
+    //   throw new AppError(403, "You are not authorized to update this facility");
+    // }
 
     const files = req.files as {
       [fieldname: string]: Express.Multer.File[];
@@ -378,7 +381,6 @@ const updateFacility = catchAsync(async (req, res) => {
 
     const updatedVideo = deleteVideo === "true" ? "" : facility.uploadVideo;
 
-    // ---------------- Update Basic Fields ----------------
     const {
       services,
       availableTime,
@@ -394,7 +396,6 @@ const updateFacility = catchAsync(async (req, res) => {
       facility._id,
       {
         ...rest,
-        userId,
         base,
         location,
         services,
@@ -466,7 +467,7 @@ const facilityDashboardSummary = catchAsync(async (req, res) => {
 
   const facilities = await Facility.find({
     userId,
-    _id: new mongoose.Types.ObjectId(facilityId), 
+    _id: new mongoose.Types.ObjectId(facilityId),
   });
 
   if (!facilities || facilities.length === 0) {
