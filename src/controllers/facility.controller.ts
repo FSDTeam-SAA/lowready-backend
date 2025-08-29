@@ -466,7 +466,7 @@ const facilityDashboardSummary = catchAsync(async (req, res) => {
 
   const facilities = await Facility.find({
     userId,
-    _id: new mongoose.Types.ObjectId(facilityId), // ensure ObjectId match
+    _id: new mongoose.Types.ObjectId(facilityId), 
   });
 
   if (!facilities || facilities.length === 0) {
