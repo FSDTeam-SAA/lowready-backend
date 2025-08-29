@@ -31,7 +31,7 @@ router.get("/summary/:facilityId", protect,
   isOrganization, facilityController.facilityDashboardSummary);
 
 router.put(
-  "/update/my-facility",
+  "/update/:facilityId",
   protect,
   isOrganization,
   upload.fields([
