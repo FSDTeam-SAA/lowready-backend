@@ -37,11 +37,34 @@ router.put(
 );
 
 router.put(
+  "/status-cancel/:bookingId",
+  protect,
+  isOrganization,
+  visitBookingController.updateCancelVisitBookingStatus
+);
+
+router.put(
   "/feedback/:bookingId",
   protect,
   isUser,
   visitBookingController.addFeedback
 );
+
+router.put(
+  "/reschedule/:bookingId",
+  protect,
+  isUser,
+  visitBookingController.rescheduleVisitBooking
+);
+
+router.delete(
+  "/:bookingId",
+  protect,
+  isUser,
+  visitBookingController.deleteVisitBooking
+);
+
+router.get("/:userId", visitBookingController.getSingleUserVisitBooking);
 
 const visitBookingRouter = router;
 export default visitBookingRouter;

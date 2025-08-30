@@ -117,12 +117,20 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
 
+  // ✅ Filter by status (support "all")
+  const { status } = req.query;
+  const filter: any = { facility: facility._id };
+
+  if (
+    status &&
+    status !== "all" && // 🔥 If "all" → don't filter
+    ["upcoming", "completed", "cancelled"].includes(status as string)
+  ) {
+    filter.status = status;
+  }
+
   const [result, total] = await Promise.all([
-    VisitBooking.find({ facility: facility._id })
-      .populate({
-        path: "facility",
-        select: "name location price images",
-      })
+    VisitBooking.find(filter)
       .populate({
         path: "userId",
         select: "firstName lastName email phoneNumber",
@@ -130,7 +138,7 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 }),
-    VisitBooking.countDocuments({ facility: facility._id }),
+    VisitBooking.countDocuments(filter),
   ]);
 
   return sendResponse(res, {
@@ -149,21 +157,43 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
   });
 });
 
+
 const updateVisitBookingStatus = catchAsync(async (req, res) => {
   const { bookingId } = req.params;
-  const { status } = req.body;
 
   const visitBooking = await VisitBooking.findById(bookingId);
   if (!visitBooking) throw new AppError(404, "Visit booking not found");
 
-  const validStatuses = ["upcoming", "completed", "cancelled"];
-  if (!validStatuses.includes(status)) {
-    throw new AppError(400, "Invalid status value");
-  }
+  const result = await VisitBooking.findByIdAndUpdate(
+    bookingId,
+    { status: "completed" },
+    { new: true }
+  )
+    .populate({
+      path: "facility",
+      select: "name location price images",
+    })
+    .populate({
+      path: "userId",
+      select: "firstName lastName email phoneNumber",
+    });
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Visit booking status updated successfully",
+    data: result,
+  });
+});
+
+const updateCancelVisitBookingStatus = catchAsync(async (req, res) => {
+  const { bookingId } = req.params;
+  const visitBooking = await VisitBooking.findById(bookingId);
+  if (!visitBooking) throw new AppError(404, "Visit booking not found");
 
   const result = await VisitBooking.findByIdAndUpdate(
     bookingId,
-    { status },
+    { status: "cancelled" },
     { new: true }
   )
     .populate({
@@ -186,6 +216,10 @@ const updateVisitBookingStatus = catchAsync(async (req, res) => {
 const addFeedback = catchAsync(async (req, res) => {
   const { bookingId } = req.params;
   const { feedback, rating } = req.body;
+
+  if (!feedback || !rating) {
+    throw new AppError(400, "Feedback and rating are required");
+  }
 
   const visitBooking = await VisitBooking.findById(bookingId);
   if (!visitBooking) throw new AppError(404, "Visit booking not found");
@@ -212,11 +246,78 @@ const addFeedback = catchAsync(async (req, res) => {
   });
 });
 
+const rescheduleVisitBooking = catchAsync(async (req, res) => {
+  const { bookingId } = req.params;
+  const { visitDate, visitTime } = req.body;
+
+  const visitBooking = await VisitBooking.findById(bookingId);
+  if (!visitBooking) throw new AppError(404, "Visit booking not found");
+
+  const facility = await Facility.findById(visitBooking.facility);
+  if (!facility) throw new AppError(404, "Facility not found");
+
+  const result = await VisitBooking.findByIdAndUpdate(
+    bookingId,
+    { visitDate, visitTime },
+    { new: true }
+  )
+    .populate({
+      path: "facility",
+      select: "name location price images",
+    })
+    .populate({
+      path: "userId",
+      select: "firstName lastName email phoneNumber",
+    });
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Visit booking rescheduled successfully",
+    data: result,
+  });
+});
+
+const deleteVisitBooking = catchAsync(async (req, res) => {
+  const { bookingId } = req.params;
+
+  const visitBooking = await VisitBooking.findById(bookingId);
+  if (!visitBooking) throw new AppError(404, "Visit booking not found");
+
+  await VisitBooking.findByIdAndDelete(bookingId);
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Visit booking deleted successfully",
+  });
+});
+
+const getSingleUserVisitBooking = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(404, "User not found");
+
+  const result = await VisitBooking.find({ userId: userId }).populate("userId");
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Your Visit Bookings retrieved successfully",
+    data: result,
+  });
+});
+
 const visitBookingController = {
   createVisitBooking,
   getMyVisitBookings,
   getMyFacilityBookings,
   updateVisitBookingStatus,
+  updateCancelVisitBookingStatus,
   addFeedback,
+  rescheduleVisitBooking,
+  deleteVisitBooking,
+  getSingleUserVisitBooking,
 };
 export default visitBookingController;

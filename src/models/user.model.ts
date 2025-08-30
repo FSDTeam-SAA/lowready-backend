@@ -23,7 +23,6 @@ const userSchema: Schema = new Schema<IUser>(
     street: { type: String, default: '' },
     postCode: { type: Number, default: null },
     phoneNum: { type: String, default: '' },
-    dateOfBirth: { type: Date },
     stripeAccountId:{type:String},
     onboardingStatus:{type:Boolean,default:false},
     accountLink:{type:String},
