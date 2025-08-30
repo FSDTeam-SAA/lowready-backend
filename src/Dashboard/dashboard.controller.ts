@@ -70,53 +70,77 @@ export const getAllUserPayments = catchAsync(async (req: Request, res: Response)
 
 
 
+
 export const getAllPayments = catchAsync(async (req: Request, res: Response) => {
   const page = Number(req.query.page) || 1;
   const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  // Only booking payments
-  const matchQuery = { type: "booking", status: "paid" };
+  // Optional type filter from query
+  const typeFilter = req.query.type as string; // "booking" or "subscription" or undefined
+  const matchQuery: any = { status: "paid" };
+  if (typeFilter) matchQuery.type = { $in: typeFilter.split(",") }; // support multiple types
 
-  // Aggregate total admin share per facility
-  const aggregationPipeline = [
-    { $match: matchQuery },
-    {
-      $group: {
-        _id: "$referenceId",
-        totalAdminShare: { $sum: { $multiply: ["$amount", 0.18] } }, // 18% of each booking
-      },
-    },
-    { $sort: { totalAdminShare: -1 } },
-    { $skip: skip },
-    { $limit: limit },
-  ];
+  // 1️⃣ Fetch filtered payments with population
+  const allPayments = await payment
+    .find(matchQuery)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate([
+      { path: "userId", model: User ,strictPopulate: false},                // populate user if exists
+      { path: "referenceId", model: Facility ,strictPopulate: false},      // populate facility if exists
+      { path: "subscriptionPlan", model: SubscriptionPlan,strictPopulate: false }, // populate subscription plan
+    ]);
 
-  const facilityEarnings = await payment.aggregate(aggregationPipeline);
+  // 2️⃣ Separate bookings from other types
+  const bookings = allPayments.filter((p) => p.type === "booking");
+  const others = allPayments.filter((p) => p.type !== "booking");
 
-  // Populate facility info
-  const result = await Promise.all(
-    facilityEarnings.map(async (f) => {
-      const facility = await Facility.findById(f._id);
-      return {
-        facility,
-        totalAdminShare: +f.totalAdminShare.toFixed(2), // round to 2 decimals
-      };
-    })
-  );
+  // 3️⃣ Group bookings by facility
+  const bookingGroupsMap = new Map<string, any>();
+  for (const b of bookings) {
+    const facilityId = b.referenceId?._id?.toString() || b.referenceId?.toString();
+    if (!bookingGroupsMap.has(facilityId)) {
+      bookingGroupsMap.set(facilityId, {
+        facility: b.referenceId || null,
+        totalAdminShare: 0,
+        payments: [],
+      });
+    }
+    const group = bookingGroupsMap.get(facilityId);
+    group.totalAdminShare += b.amount * 0.18;
+    group.payments.push(b);
+  }
 
-  // Count total distinct facilities for pagination
-  const totalFacilities = await payment.distinct("referenceId", matchQuery);
+  const groupedBookings = Array.from(bookingGroupsMap.values()).map((g) => ({
+    facility: g.facility,
+    totalAdminShare: +g.totalAdminShare.toFixed(2),
+    payments: g.payments,
+  }));
+
+  // 4️⃣ Map other payments individually
+  const otherResults = others.map((p) => ({
+    facility: p.referenceId || null, // if reference exists
+    totalAdminShare: 0,
+    payments: [p],
+  }));
+
+  // 5️⃣ Combine bookings + other payments
+  const result = [...groupedBookings, ...otherResults];
+
+  // 6️⃣ Prepare meta
+  const totalCount = await payment.countDocuments(matchQuery);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Admin earnings per facility fetched successfully",
+    message: "Payments fetched successfully",
     meta: {
-      total: totalFacilities.length,
+      total: totalCount,
       page,
       limit,
-      totalPages: Math.ceil(totalFacilities.length / limit),
+      totalPages: Math.ceil(totalCount / limit),
     },
     data: result,
   });
