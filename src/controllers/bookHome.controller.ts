@@ -5,12 +5,15 @@ import AppError from '../errors/AppError'
 import sendResponse from '../utils/sendResponse'
 import { BookHome } from '../models/bookHome.model'
 import { getPaginationParams, buildMetaPagination } from '../utils/pagination'
+import { User } from '../models/user.model'
 
-/******************
- * CREATE BOOKING *
- ******************/
+
 export const createBooking = catchAsync(async (req: Request, res: Response) => {
   const booking = await BookHome.create(req.body)
+
+  await User.findByIdAndUpdate(booking.userId, {
+    $inc: { totalPlacement: 1 },
+  })
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -20,9 +23,6 @@ export const createBooking = catchAsync(async (req: Request, res: Response) => {
   })
 })
 
-/********************
- * GET ALL BOOKINGS *
- ********************/
 export const getAllBookings = catchAsync(
   async (req: Request, res: Response) => {
     const { page, limit, skip } = getPaginationParams(req.query)
@@ -47,9 +47,7 @@ export const getAllBookings = catchAsync(
   }
 )
 
-/****************************
- * GET BOOKINGS BY FACILITY *
- ****************************/
+
 export const getBookingsByFacility = catchAsync(
   async (req: Request, res: Response) => {
     const { page, limit, skip } = getPaginationParams(req.query)
@@ -75,9 +73,7 @@ export const getBookingsByFacility = catchAsync(
   }
 )
 
-/**************************
- * GET BOOKINGS BY USERID *
- **************************/
+
 export const getBookingsByUser = catchAsync(
   async (req: Request, res: Response) => {
     const { page, limit, skip } = getPaginationParams(req.query)
@@ -102,9 +98,6 @@ export const getBookingsByUser = catchAsync(
   }
 )
 
-/**********************
- * GET SINGLE BOOKING *
- **********************/
 export const getBooking = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params
   const booking = await BookHome.findById(id)
@@ -123,9 +116,6 @@ export const getBooking = catchAsync(async (req: Request, res: Response) => {
   })
 })
 
-/*****************************************
- * EDIT BOOKING (PATCH = PARTIAL UPDATE) *
- *****************************************/
 export const editBooking = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params
   const booking = await BookHome.findByIdAndUpdate(id, req.body, {

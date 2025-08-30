@@ -14,9 +14,9 @@ export interface IUser extends Document {
   phoneNum?: string
   dateOfBirth?: Date
   avatars?: string
-  stripeAccountId?:string
-  onboardingStatus?:boolean 
-  accountLink?:string
+  stripeAccountId?: string
+  onboardingStatus?: boolean
+  accountLink?: string
 
   // Extra fields
   avatar?: {
@@ -30,6 +30,8 @@ export interface IUser extends Document {
   password_reset_token: string
   fine: number
   refresh_token: string
+  totalTour: number
+  totalPlacement: number
 }
 
 export type TLoginUser = {
