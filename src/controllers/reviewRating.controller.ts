@@ -52,9 +52,6 @@ export const createReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
-
 export const getAllReviews = catchAsync(async (req: Request, res: Response) => {
   const reviews = await ReviewRating.find()
     .populate("userId", "firstName lastName email")
@@ -150,8 +147,6 @@ export const updateReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
 export const deleteReview = catchAsync(async (req, res) => {
   const { id } = req.params;
 
@@ -209,3 +204,20 @@ export const reviewRatingDashboard = catchAsync(async (req, res) => {
     },
   });
 });
+
+
+export const getSingleReview = catchAsync(async (req: Request, res: Response) => {
+  const { reviewId } = req.params;
+
+  const review = await ReviewRating.findById(reviewId)
+  if (!review) {
+    throw new AppError(httpStatus.NOT_FOUND, "Review not found");
+  }
+
+  return sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Review get successfully",
+    data: review,
+  });
+})
