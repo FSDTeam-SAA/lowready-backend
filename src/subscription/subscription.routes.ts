@@ -7,10 +7,12 @@ import { createPlan, deletePlan, getAllPlans, getPlanById, updatePlan } from './
 
 const router = express.Router();
 
-router.post('/', protect, isAdmin, createPlan); // Only admin can create
-router.get('/', protect, isAdmin, getAllPlans); // Only admin can view all plans
+router.post('/create', protect, isAdmin, createPlan); // Only admin can create
+router.get('/get',getAllPlans); // Only admin can view all plans
 router.get('/:id', protect, getPlanById); // Anyone can view a plan by ID
-router.patch('/:id', protect, isAdmin, updatePlan); // Only admin can update
-router.delete('/:id', protect, isAdmin, deletePlan); // Only admin can delete
+router.put('/update/:id', protect, isAdmin, updatePlan); // Only admin can update
+router.delete('/delete/:id', protect, isAdmin, deletePlan); // Only admin can delete
 
-export default router;
+
+const subscription = router
+export default subscription;

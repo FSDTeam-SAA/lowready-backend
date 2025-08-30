@@ -10,6 +10,7 @@ import { createSubscriptionPlan, deleteSubscriptionPlan, getAllSubscriptionPlans
  * CREATE PLAN *
  ******************/
 export const createPlan = catchAsync(async (req: Request, res: Response) => {
+
   const plan = await createSubscriptionPlan(req.body);
 
   sendResponse(res, {
