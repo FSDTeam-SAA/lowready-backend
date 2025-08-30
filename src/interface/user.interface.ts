@@ -18,6 +18,13 @@ export interface IUser extends Document {
   onboardingStatus?: boolean
   accountLink?: string
 
+   // Subscription fields
+  subscriptionPlan?: string
+  subscriptionStartDate?: Date
+  subscriptionEndDate?: Date
+  subscriptionStatus?: 'active' | 'expired' | 'cancelled'
+  isSubscriptionActive?: boolean
+
   // Extra fields
   avatar?: {
     public_id: string
