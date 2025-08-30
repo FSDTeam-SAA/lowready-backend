@@ -7,58 +7,114 @@ import catchAsync from "../utils/catchAsync";
 
 
 const getAdminDashboardSummery = catchAsync(async (req, res) => {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
 
-    const currentYear = new Date().getFullYear();
-    const lastYear = currentYear - 1;
+    // 📅 Current month range
+    const startOfCurrentMonth = new Date(currentYear, currentMonth, 1);
+    const startOfNextMonth = new Date(currentYear, currentMonth + 1, 1);
 
-    const startOfCurrentYear = new Date(`${currentYear}-01-01T00:00:00Z`);
-    const startOfNextYear = new Date(`${currentYear + 1}-01-01T00:00:00Z`);
-    const startOfLastYear = new Date(`${lastYear}-01-01T00:00:00Z`);
+    // 📅 Previous month range
+    const startOfLastMonth = new Date(currentYear, currentMonth - 1, 1);
+    const startOfCurrentMonthCopy = new Date(currentYear, currentMonth, 1);
 
     const calcGrowth = (now: number, prev: number) => {
         if (prev === 0) return now > 0 ? 100 : 0;
-        return Number((((now - prev) / prev) * 100).toFixed(1));
+        const growth = ((now - prev) / prev) * 100;
+        return Math.min(100, Math.max(-100, Number(growth.toFixed(1))));
     };
 
+    // 🏢 Facilities
     const facilitiesNow = await Facility.countDocuments({
-        createdAt: { $gte: startOfCurrentYear, $lt: startOfNextYear },
+        createdAt: { $gte: startOfCurrentMonth, $lt: startOfNextMonth },
     });
     const facilitiesLast = await Facility.countDocuments({
-        createdAt: { $gte: startOfLastYear, $lt: startOfCurrentYear },
+        createdAt: { $gte: startOfLastMonth, $lt: startOfCurrentMonthCopy },
     });
 
-    const usersNow = await User.countDocuments({
-        createdAt: { $gte: startOfCurrentYear, $lt: startOfNextYear },
+    // 👥 Service Providers
+    const serviceProvidersNow = await User.countDocuments({
+        role: "user",
+        createdAt: { $gte: startOfCurrentMonth, $lt: startOfNextMonth },
     });
-    const usersLast = await User.countDocuments({
-        createdAt: { $gte: startOfLastYear, $lt: startOfCurrentYear },
+    const serviceProvidersLast = await User.countDocuments({
+        role: "user",
+        createdAt: { $gte: startOfLastMonth, $lt: startOfCurrentMonthCopy },
     });
 
+    // 👤 Customers
+    const customersNow = await User.countDocuments({
+        role: "user",
+        createdAt: { $gte: startOfCurrentMonth, $lt: startOfNextMonth },
+    });
+    const customersLast = await User.countDocuments({
+        role: "user",
+        createdAt: { $gte: startOfLastMonth, $lt: startOfCurrentMonthCopy },
+    });
 
+    // 📅 Bookings
     const visitToursNow = await VisitBooking.countDocuments({
-        createdAt: { $gte: startOfCurrentYear, $lt: startOfNextYear },
+        createdAt: { $gte: startOfCurrentMonth, $lt: startOfNextMonth },
     });
     const visitToursLast = await VisitBooking.countDocuments({
-        createdAt: { $gte: startOfLastYear, $lt: startOfCurrentYear },
+        createdAt: { $gte: startOfLastMonth, $lt: startOfCurrentMonthCopy },
     });
 
     const facilityBookingsNow = await BookHome.countDocuments({
-        createdAt: { $gte: startOfCurrentYear, $lt: startOfNextYear },
+        createdAt: { $gte: startOfCurrentMonth, $lt: startOfNextMonth },
     });
     const facilityBookingsLast = await BookHome.countDocuments({
-        createdAt: { $gte: startOfLastYear, $lt: startOfCurrentYear },
+        createdAt: { $gte: startOfLastMonth, $lt: startOfCurrentMonthCopy },
     });
 
     const totalBookingsNow = visitToursNow + facilityBookingsNow;
     const totalBookingsLast = visitToursLast + facilityBookingsLast;
 
+
+    // console.log({
+    //     "facility": "facility",
+    //     "this month": facilitiesNow,
+    //     "last month": facilitiesLast,
+    //     "this month - last month": facilitiesNow - facilitiesLast,
+    //     "this month %": calcGrowth(facilitiesNow, facilitiesLast),
+    // })
+
+    // console.log({
+    //     "service provider": "service provider",
+    //     "this month": serviceProvidersNow,
+    //     "last month": serviceProvidersLast,
+    //     "this month - last month": serviceProvidersNow - serviceProvidersLast,
+    //     "this month %": calcGrowth(serviceProvidersNow, serviceProvidersLast),
+    // })
+
+    // console.log({
+    //     "customer": "customer",
+    //     "this month": customersNow,
+    //     "last month": customersLast,
+    //     "this month - last month": customersNow - customersLast,
+    //     "this month %": calcGrowth(customersNow, customersLast),
+    // })
+
+    // console.log({
+    //     "booking": "booking",
+    //     "this month": totalBookingsNow,
+    //     "last month": totalBookingsLast,
+    //     "this month - last month": totalBookingsNow - totalBookingsLast,
+    //     "this month %": calcGrowth(totalBookingsNow, totalBookingsLast),
+    // })
+
+
+    // 📊 Summary
     const summary = {
         totalFacilities: facilitiesNow,
         facilitiesGrowth: calcGrowth(facilitiesNow, facilitiesLast),
 
-        totalServiceProviders: usersNow,
-        totalCustomers: usersNow,
-        customersGrowth: calcGrowth(usersNow, usersLast),
+        totalServiceProviders: serviceProvidersNow,
+        serviceProvidersGrowth: calcGrowth(serviceProvidersNow, serviceProvidersLast),
+
+        totalCustomers: customersNow,
+        customersGrowth: calcGrowth(customersNow, customersLast),
 
         totalBookings: totalBookingsNow,
         bookingsGrowth: calcGrowth(totalBookingsNow, totalBookingsLast),
@@ -66,10 +122,11 @@ const getAdminDashboardSummery = catchAsync(async (req, res) => {
 
     return res.status(200).json({
         success: true,
-        message: "Admin dashboard summary fetched successfully",
+        message: "Admin dashboard summary (monthly) fetched successfully",
         data: summary,
     });
 });
+
 
 
 
