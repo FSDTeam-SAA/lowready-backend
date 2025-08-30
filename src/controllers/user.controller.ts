@@ -459,3 +459,45 @@ export const getSingleUser = catchAsync(async (req: Request, res: Response) => {
     data: user,
   });
 });
+
+
+export const getAllOrganizations = catchAsync(
+  async (req: Request, res: Response) => {
+    const { page = 1, limit = 10, search } = req.query
+
+    const pageNum = Number(page)
+    const limitNum = Number(limit)
+    const skip = (pageNum - 1) * limitNum
+
+    // Base query → only organizations
+    const query: any = { role: 'organization' }
+
+    // If search query is passed → filter by firstName, lastName, or email
+    if (search) {
+      query.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ]
+    }
+
+    const organizations = await User.find(query)
+      .select('-password -refresh_token -password_reset_token')
+      .skip(skip)
+      .limit(limitNum)
+
+    const total = await User.countDocuments(query)
+
+    res.status(200).json({
+      success: true,
+      message: 'All organizations fetched successfully',
+      data: organizations,
+      meta: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    })
+  }
+)
