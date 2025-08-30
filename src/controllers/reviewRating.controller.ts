@@ -15,32 +15,43 @@ export const createReview = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(httpStatus.BAD_REQUEST, "Missing required fields");
   }
 
+  // 🔹 Create new review
   const review = await ReviewRating.create({ userId, facility, star, comment });
 
+  // 🔹 Recalculate stats (avg + count) for that facility
   const stats = await ReviewRating.aggregate([
     { $match: { facility: new mongoose.Types.ObjectId(facility) } },
     {
       $group: {
         _id: "$facility",
-        avgRating: { $avg: "$star" }
+        avgRating: { $avg: "$star" },
+        ratingCount: { $sum: 1 }
       }
     }
   ]);
 
   let newAvgRating = stats.length > 0 ? stats[0].avgRating : 0;
+  let newRatingCount = stats.length > 0 ? stats[0].ratingCount : 0;
 
   newAvgRating = Number(newAvgRating.toFixed(1));
-  await Facility.findByIdAndUpdate(facility, { rating: newAvgRating });
+
+  // 🔹 Update Facility with both values
+  await Facility.findByIdAndUpdate(facility, {
+    rating: newAvgRating,
+    ratingCount: newRatingCount
+  });
 
   res.status(httpStatus.CREATED).json({
     success: true,
     message: "Review created successfully",
     data: {
       review,
-      rating: newAvgRating
+      rating: newAvgRating,
+      ratingCount: newRatingCount
     }
   });
 });
+
 
 
 
@@ -90,9 +101,7 @@ export const getReviewsByFacility = catchAsync(
   }
 );
 
-/********************
- * // UPDATE REVIEW *
- ********************/
+
 export const updateReview = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { star, comment } = req.body;
@@ -107,22 +116,27 @@ export const updateReview = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(httpStatus.NOT_FOUND, "Review not found");
   }
 
+  // 🔹 Recalculate stats for that facility
   const stats = await ReviewRating.aggregate([
     { $match: { facility: updatedReview.facility } },
     {
       $group: {
         _id: "$facility",
-        avgRating: { $avg: "$star" }
+        avgRating: { $avg: "$star" },
+        ratingCount: { $sum: 1 }
       }
     }
   ]);
 
   let newAvgRating = stats.length > 0 ? stats[0].avgRating : 0;
+  let newRatingCount = stats.length > 0 ? stats[0].ratingCount : 0;
 
   newAvgRating = Number(newAvgRating.toFixed(1));
 
+  // 🔹 Update facility with both rating + ratingCount
   await Facility.findByIdAndUpdate(updatedReview.facility, {
-    rating: newAvgRating
+    rating: newAvgRating,
+    ratingCount: newRatingCount
   });
 
   res.status(httpStatus.OK).json({
@@ -130,15 +144,14 @@ export const updateReview = catchAsync(async (req: Request, res: Response) => {
     message: "Review updated successfully",
     data: {
       review: updatedReview,
-      rating: newAvgRating
+      rating: newAvgRating,
+      ratingCount: newRatingCount
     }
   });
 });
 
 
-/********************
- * // DELETE REVIEW *
- ********************/
+
 export const deleteReview = catchAsync(async (req, res) => {
   const { id } = req.params;
 

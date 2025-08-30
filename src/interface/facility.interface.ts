@@ -33,6 +33,7 @@ export interface IFacility extends Document {
   facilityLicenseNumber?: string;
   medicaidPrograms?: string[];
   rating?: number;
+  ratingCount?: number;
 }
 
 export interface FacilityModel extends Model<IFacility> { }
