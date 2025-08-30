@@ -30,7 +30,7 @@ router.patch('/update', protect, upload.single('photo'), updateUser)
 router.post('/refresh-token', refreshToken)
 
 router.get('/customers', protect, isAdmin, getAllNormalUsers)
-router.get('/:userId', getSingleUser)
 router.get('/organizations', protect, isAdmin, getAllOrganizations)
+router.get('/:userId', getSingleUser)
 
 export default router
