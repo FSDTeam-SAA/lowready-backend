@@ -9,7 +9,7 @@ const router = Router();
 
 router.post('/pay', protect, createPayment);
 router.get("/user/all", protect, getAllUserPayments);
-router.get("/all", protect,isAdmin, getAllPayments);
+router.get("/all", protect, getAllPayments);
 
 const payment = router
 export default payment;
