@@ -49,4 +49,11 @@ router.get(
   facilityController.getSingleFacility
 );
 
+router.put(
+  "/update-status/:facilityId",
+  // protect,
+  // isOrganization,
+  facilityController.updateFacilityStatus
+);
+
 export const facilityRouter = router;

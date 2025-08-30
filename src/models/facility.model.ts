@@ -85,6 +85,11 @@ const facilitySchema: Schema = new Schema<IFacility>(
       min: 0,
       max: 5,
       default: 0,
+    },
+    status: {
+      type: String,
+      enum: ["approved", "pending", "declined"],
+      default: "pending",
     }
   },
   { timestamps: true }
