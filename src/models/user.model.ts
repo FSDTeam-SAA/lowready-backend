@@ -28,7 +28,7 @@ const userSchema: Schema = new Schema<IUser>(
     accountLink: { type: String },
 
      // Subscription fields
-    subscriptionPlan: { type: mongoose.Schema.Types.ObjectId, ref: 'SubscriptionPlan' },
+    subscriptionPlan: { type: Schema.Types.ObjectId, ref: 'SubscriptionPlan' },
     subscriptionStartDate: { type: Date },
     subscriptionEndDate: { type: Date },
     subscriptionStatus: {

@@ -5,9 +5,10 @@ import { notFound } from "./middlewares/notFound";
 import router from "./routes";
 import cookieParser from "cookie-parser";
 import { stripeWebhook } from "./controllers/serviceProviderAccount.controller";
+import { stripeWebhookHandler } from "./Payment/payment.controller";
 const app = express();
 app.post('/api/v1/webhook', express.raw({ type: '*/*' }),stripeWebhook);
-
+app.post('/api/v1/payment/webhook', express.raw({ type: '*/*' }),stripeWebhookHandler);
 app.use(express.json());
 app.use(cookieParser());
 

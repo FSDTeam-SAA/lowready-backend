@@ -14,6 +14,7 @@ import accountRoutes from './account.routes'
 import notificationRouter from './notification.route'
 import newsLetterRouter from './newsLetter.route'
 import subscription from '../subscription/subscription.routes'
+import payment from '../Payment/payment.routes'
 
 
 const router = Router()
@@ -69,6 +70,11 @@ const moduleRoutes = [
     {
     path: '/subscription',
     route: subscription,
+
+  },
+    {
+    path: '/payment',
+    route: payment,
 
   },
 ]
