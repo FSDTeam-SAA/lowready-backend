@@ -90,7 +90,9 @@ const facilitySchema: Schema = new Schema<IFacility>(
       type: String,
       enum: ["approved", "pending", "declined"],
       default: "pending",
-    }
+    },
+    totalTour: { type: Number, default: 0 },
+    totalPlacement: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
