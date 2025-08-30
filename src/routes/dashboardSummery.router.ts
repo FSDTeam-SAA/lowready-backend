@@ -1,12 +1,15 @@
-import { Router } from "express";
-import dashboardSummeryController from "../controllers/dashboardSummery";
+import { Router } from 'express'
+import dashboardSummeryController, {
+  getMonthlyEarnings,
+} from '../controllers/dashboardSummery'
 
+const router = Router()
 
-const router = Router();
+router.get(
+  '/admin-dashboard',
+  dashboardSummeryController.getAdminDashboardSummery
+)
+router.get('/admin-dashboard/total/earnings', getMonthlyEarnings)
 
-router.get("/admin-dashboard", dashboardSummeryController.getAdminDashboardSummery)
-
-
-
-const dashboardSummeryRouter = router;
-export default dashboardSummeryRouter;
+const dashboardSummeryRouter = router
+export default dashboardSummeryRouter
