@@ -245,20 +245,12 @@ const getAllFacilities = catchAsync(async (req, res) => {
 
 const updateFacility = catchAsync(async (req, res) => {
   try {
-    // const { _id: userId } = req.user as any;
-
-    // const user = await User.findById(userId);
-    // if (!user) throw new AppError(404, "User not found");
     const { facilityId } = req.params;
 
     const facility = await Facility.findById(facilityId);
     if (!facility) {
       throw new AppError(404, "Facility not found");
     }
-
-    // if (facility.userId.toString() !== userId.toString()) {
-    //   throw new AppError(403, "You are not authorized to update this facility");
-    // }
 
     const files = req.files as {
       [fieldname: string]: Express.Multer.File[];
