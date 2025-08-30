@@ -28,6 +28,19 @@ const userSchema: Schema = new Schema<IUser>(
     onboardingStatus:{type:Boolean,default:false},
     accountLink:{type:String},
 
+     // Subscription fields
+    subscriptionPlan: { type: mongoose.Schema.Types.ObjectId, ref: 'SubscriptionPlan' },
+    subscriptionStartDate: { type: Date },
+    subscriptionEndDate: { type: Date },
+    subscriptionStatus: {
+      type: String,
+      enum: ['active', 'expired', 'cancelled'],
+      default: 'active',
+    },
+    isSubscriptionActive: { type: Boolean, default: false },
+
+  
+
     // Keep extra fields you had earlier (if needed in your system)
     avatar: {
       public_id: { type: String, default: '' },
