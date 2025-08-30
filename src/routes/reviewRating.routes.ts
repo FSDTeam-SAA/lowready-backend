@@ -6,12 +6,14 @@ import {
   updateReview,
   deleteReview,
   reviewRatingDashboard,
+  getSingleReview,
 } from "../controllers/reviewRating.controller";
 
 const router = Router();
 
 router.post("/", createReview);
 router.get("/", getAllReviews);
+router.get("/:reviewId", getSingleReview)
 router.get("/facility/:facilityId", getReviewsByFacility);
 router.get("/summary/:facilityId", reviewRatingDashboard);
 router.put("/:id", updateReview);
