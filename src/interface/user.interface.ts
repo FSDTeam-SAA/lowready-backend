@@ -18,7 +18,7 @@ export interface IUser extends Document {
   onboardingStatus?: boolean
   accountLink?: string
 
-   // Subscription fields
+  // Subscription fields
   subscriptionPlan?: string
   subscriptionStartDate?: Date
   subscriptionEndDate?: Date
@@ -37,8 +37,6 @@ export interface IUser extends Document {
   password_reset_token: string
   fine: number
   refresh_token: string
-  totalTour: number
-  totalPlacement: number
 }
 
 export type TLoginUser = {

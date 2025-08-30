@@ -34,6 +34,9 @@ export interface IFacility extends Document {
   medicaidPrograms?: string[];
   rating?: number;
   ratingCount?: number;
+  status?: "approved" | "pending" | "declined";
+  totalTour: number
+  totalPlacement: number
 }
 
 export interface FacilityModel extends Model<IFacility> { }

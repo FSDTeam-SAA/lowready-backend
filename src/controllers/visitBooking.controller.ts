@@ -180,7 +180,7 @@ const updateVisitBookingStatus = catchAsync(async (req, res) => {
 
   // 🔹 If booking just got completed, increment user’s totalTour
   if (result?.status === "completed") {
-    await User.findByIdAndUpdate(result.userId, {
+    await Facility.findByIdAndUpdate(result.facility, {
       $inc: { totalTour: 1 },
     });
   }
@@ -307,7 +307,13 @@ const getSingleUserVisitBooking = catchAsync(async (req, res) => {
   const user = await User.findById(userId);
   if (!user) throw new AppError(404, "User not found");
 
-  const result = await VisitBooking.find({ userId: userId }).populate("userId");
+  const result = await VisitBooking.find({ userId: userId }).populate({
+    path: "userId",
+    select: "-password -password_reset_token, -refresh_token -__v  -verificationInfo",
+  }).populate({
+    path: "facility",
+    select: "name location images",
+  });
 
   return sendResponse(res, {
     statusCode: 200,

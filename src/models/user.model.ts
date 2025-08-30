@@ -27,8 +27,13 @@ const userSchema: Schema = new Schema<IUser>(
     onboardingStatus: { type: Boolean, default: false },
     accountLink: { type: String },
 
+
      // Subscription fields
     subscriptionPlan: { type: Schema.Types.ObjectId, ref: 'SubscriptionPlan' },
+
+   
+   
+
     subscriptionStartDate: { type: Date },
     subscriptionEndDate: { type: Date },
     subscriptionStatus: {
@@ -38,7 +43,7 @@ const userSchema: Schema = new Schema<IUser>(
     },
     isSubscriptionActive: { type: Boolean, default: false },
 
-  
+
 
     // Keep extra fields you had earlier (if needed in your system)
     avatar: {
@@ -51,8 +56,6 @@ const userSchema: Schema = new Schema<IUser>(
     },
     password_reset_token: { type: String, default: '' },
     refresh_token: { type: String, default: '' },
-    totalTour: { type: Number, default: 0 },
-    totalPlacement: { type: Number, default: 0 },
   },
   { timestamps: true }
 )
