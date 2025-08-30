@@ -159,7 +159,9 @@ const getAllFacilities = catchAsync(async (req, res) => {
     maxPrice,
     careServices,
     amenities,
-    rating,   // 👈 added here
+    rating,        // ⭐ Rating filter
+    availability,  // ✅ New: availability (true/false/all)
+    status,        // ✅ New: pending, approved, rejected, etc.
     page = 1,
     limit = 10,
   } = req.query;
@@ -204,7 +206,7 @@ const getAllFacilities = catchAsync(async (req, res) => {
     filter.amenities = { $in: amenitiesArray };
   }
 
-  // ⭐ Rating filter (1,2,3,4,5 but works with decimals)
+  // ⭐ Rating filter
   if (rating) {
     const ratingValue = Number(rating);
     if (!isNaN(ratingValue) && ratingValue >= 1 && ratingValue <= 5) {
@@ -213,6 +215,20 @@ const getAllFacilities = catchAsync(async (req, res) => {
         $lt: ratingValue + 1,
       };
     }
+  }
+
+  // ✅ Availability filter
+  if (availability && availability !== "all") {
+    if (availability === "true") {
+      filter.availability = true;
+    } else if (availability === "false") {
+      filter.availability = false;
+    }
+  }
+
+  // ✅ Status filter (e.g., pending, approved, rejected)
+  if (status) {
+    filter.status = status;
   }
 
   // 📄 Pagination
@@ -448,7 +464,6 @@ const getAllFacilitiesLocations = catchAsync(async (req, res) => {
   });
 })
 
-
 const facilityDashboardSummary = catchAsync(async (req, res) => {
   const { _id: userId } = req.user as any;
   const { facilityId } = req.params;
@@ -481,11 +496,28 @@ const facilityDashboardSummary = catchAsync(async (req, res) => {
   });
 });
 
+const updateFacilityStatus = catchAsync(async (req, res) => {
+  const { facilityId } = req.params;
+  const { status } = req.body;
 
+  const facility = await Facility.findById(facilityId);
+  if (!facility) {
+    throw new AppError(404, "Facility not found");
+  }
 
+  const updatedFacility = await Facility.findByIdAndUpdate(
+    facilityId,
+    { status },
+    { new: true, runValidators: true }
+  );
 
-
-
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Facility status updated successfully",
+    data: updatedFacility,
+  });
+});
 
 
 const facilityController = {
@@ -495,6 +527,7 @@ const facilityController = {
   updateFacility,
   getSingleFacility,
   getAllFacilitiesLocations,
-  facilityDashboardSummary
+  facilityDashboardSummary,
+  updateFacilityStatus
 };
 export default facilityController;
