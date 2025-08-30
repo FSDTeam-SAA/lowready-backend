@@ -23,9 +23,9 @@ const userSchema: Schema = new Schema<IUser>(
     street: { type: String, default: '' },
     postCode: { type: Number, default: null },
     phoneNum: { type: String, default: '' },
-    stripeAccountId:{type:String},
-    onboardingStatus:{type:Boolean,default:false},
-    accountLink:{type:String},
+    stripeAccountId: { type: String },
+    onboardingStatus: { type: Boolean, default: false },
+    accountLink: { type: String },
 
      // Subscription fields
     subscriptionPlan: { type: mongoose.Schema.Types.ObjectId, ref: 'SubscriptionPlan' },
@@ -51,6 +51,8 @@ const userSchema: Schema = new Schema<IUser>(
     },
     password_reset_token: { type: String, default: '' },
     refresh_token: { type: String, default: '' },
+    totalTour: { type: Number, default: 0 },
+    totalPlacement: { type: Number, default: 0 },
   },
   { timestamps: true }
 )

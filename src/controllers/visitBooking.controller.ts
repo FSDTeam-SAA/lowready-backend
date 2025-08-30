@@ -157,7 +157,6 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
   });
 });
 
-
 const updateVisitBookingStatus = catchAsync(async (req, res) => {
   const { bookingId } = req.params;
 
@@ -177,6 +176,15 @@ const updateVisitBookingStatus = catchAsync(async (req, res) => {
       path: "userId",
       select: "firstName lastName email phoneNumber",
     });
+
+
+  // 🔹 If booking just got completed, increment user’s totalTour
+  if (result?.status === "completed") {
+    await User.findByIdAndUpdate(result.userId, {
+      $inc: { totalTour: 1 },
+    });
+  }
+
 
   return sendResponse(res, {
     statusCode: 200,
