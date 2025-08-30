@@ -180,7 +180,7 @@ const updateVisitBookingStatus = catchAsync(async (req, res) => {
 
   // 🔹 If booking just got completed, increment user’s totalTour
   if (result?.status === "completed") {
-    await User.findByIdAndUpdate(result.userId, {
+    await Facility.findByIdAndUpdate(result.facility, {
       $inc: { totalTour: 1 },
     });
   }

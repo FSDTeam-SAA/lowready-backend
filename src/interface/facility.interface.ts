@@ -35,6 +35,8 @@ export interface IFacility extends Document {
   rating?: number;
   ratingCount?: number;
   status?: "approved" | "pending" | "declined";
+  totalTour: number
+  totalPlacement: number
 }
 
 export interface FacilityModel extends Model<IFacility> { }

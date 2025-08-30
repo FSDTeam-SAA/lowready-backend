@@ -6,12 +6,13 @@ import sendResponse from '../utils/sendResponse'
 import { BookHome } from '../models/bookHome.model'
 import { getPaginationParams, buildMetaPagination } from '../utils/pagination'
 import { User } from '../models/user.model'
+import { Facility } from '../models/facility.model'
 
 
 export const createBooking = catchAsync(async (req: Request, res: Response) => {
   const booking = await BookHome.create(req.body)
 
-  await User.findByIdAndUpdate(booking.userId, {
+  await Facility.findByIdAndUpdate(booking.facility, {
     $inc: { totalPlacement: 1 },
   })
 
