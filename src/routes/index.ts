@@ -70,7 +70,7 @@ const moduleRoutes = [
   {
     path: "/dashboard",
     route: dashboardSummeryRouter
-  }
+  },
     {
     path: '/subscription',
     route: subscription,
