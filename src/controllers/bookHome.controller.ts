@@ -7,13 +7,22 @@ import { BookHome } from '../models/bookHome.model'
 import { getPaginationParams, buildMetaPagination } from '../utils/pagination'
 import { User } from '../models/user.model'
 import { Facility } from '../models/facility.model'
-
+import { createNotification } from '../socket/notification.service'
+import mongoose from 'mongoose'
 
 export const createBooking = catchAsync(async (req: Request, res: Response) => {
   const booking = await BookHome.create(req.body)
 
   await Facility.findByIdAndUpdate(booking.facility, {
     $inc: { totalPlacement: 1 },
+  })
+
+  // 🔔 Create and send notification to the booking user
+  await createNotification({
+    to: booking.userId, // assuming booking.userId exists
+    message: `Your booking for ${Facility.name} has been confirmed!`,
+    type: 'booking',
+    id: booking._id as mongoose.Types.ObjectId,
   })
 
   sendResponse(res, {
@@ -48,7 +57,6 @@ export const getAllBookings = catchAsync(
   }
 )
 
-
 export const getBookingsByFacility = catchAsync(
   async (req: Request, res: Response) => {
     const { page, limit, skip } = getPaginationParams(req.query)
@@ -73,7 +81,6 @@ export const getBookingsByFacility = catchAsync(
     })
   }
 )
-
 
 export const getBookingsByUser = catchAsync(
   async (req: Request, res: Response) => {
@@ -135,4 +142,3 @@ export const editBooking = catchAsync(async (req: Request, res: Response) => {
     data: booking,
   })
 })
-

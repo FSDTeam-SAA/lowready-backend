@@ -20,7 +20,7 @@ export const createNotification = async ({
   to: mongoose.Types.ObjectId
   message: string
   type: string
-  id: mongoose.Types.ObjectId
+  id: mongoose.Types.ObjectId 
 }) => {
   const notification = await Notification.create({
     to,
