@@ -88,9 +88,9 @@ export const getAllPayments = catchAsync(async (req: Request, res: Response) => 
     .skip(skip)
     .limit(limit)
     .populate([
-      { path: "userId", model: User ,strictPopulate: false},                // populate user if exists
-      { path: "referenceId", model: Facility ,strictPopulate: false},      // populate facility if exists
-      { path: "subscriptionPlan", model: SubscriptionPlan,strictPopulate: false }, // populate subscription plan
+      { path: "userId", model: "User", strictPopulate: false },                // populate user if exists
+      { path: "referenceId", model: "Facility", strictPopulate: false },      // populate facility if exists
+      { path: "subscriptionPlan", model: "SubscriptionPlan", strictPopulate: false }, // populate subscription plan
     ]);
 
   // 2️⃣ Separate bookings from other types
