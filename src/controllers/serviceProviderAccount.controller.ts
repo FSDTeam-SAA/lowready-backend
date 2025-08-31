@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { User } from "../models/user.model";
 
 const stripe = new Stripe(process.env.Stripe_Secret_Key!, {
+  // @ts-ignore
   apiVersion: "2025-07-30.basil",
 });
 

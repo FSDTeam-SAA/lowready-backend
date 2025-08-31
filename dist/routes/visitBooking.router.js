@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const visitBooking_controller_1 = __importDefault(require("../controllers/visitBooking.controller"));
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.post("/create", auth_middleware_1.protect, auth_middleware_1.isUser, visitBooking_controller_1.default.createVisitBooking);
+router.get("/my-bookings", auth_middleware_1.protect, auth_middleware_1.isUser, visitBooking_controller_1.default.getMyVisitBookings);
+router.get("/facility-bookings", auth_middleware_1.protect, auth_middleware_1.isOrganization, visitBooking_controller_1.default.getMyFacilityBookings);
+router.put("/status/:bookingId", auth_middleware_1.protect, auth_middleware_1.isOrganization, visitBooking_controller_1.default.updateVisitBookingStatus);
+router.put("/status-cancel/:bookingId", auth_middleware_1.protect, auth_middleware_1.isOrganization, visitBooking_controller_1.default.updateCancelVisitBookingStatus);
+router.put("/feedback/:bookingId", auth_middleware_1.protect, auth_middleware_1.isUser, visitBooking_controller_1.default.addFeedback);
+router.put("/reschedule/:bookingId", auth_middleware_1.protect, auth_middleware_1.isUser, visitBooking_controller_1.default.rescheduleVisitBooking);
+router.delete("/:bookingId", auth_middleware_1.protect, auth_middleware_1.isUser, visitBooking_controller_1.default.deleteVisitBooking);
+router.get("/:userId", visitBooking_controller_1.default.getSingleUserVisitBooking);
+const visitBookingRouter = router;
+exports.default = visitBookingRouter;
