@@ -56,16 +56,34 @@ export const createReview = catchAsync(async (req: Request, res: Response) => {
 
 
 export const getAllReviews = catchAsync(async (req: Request, res: Response) => {
+  // Parse query params (default: page=1, limit=10)
+  const page = Number(req.query.page) || 1
+  const limit = Number(req.query.limit) || 10
+  const skip = (page - 1) * limit
+
+  // Get total count
+  const total = await ReviewRating.countDocuments()
+
+  // Fetch paginated reviews
   const reviews = await ReviewRating.find()
-    .populate("userId", "firstName lastName email")
-    .populate("facility", "name address");
+    .populate('userId', 'firstName lastName email')
+    .populate('facility', 'name address')
+    .skip(skip)
+    
+    .limit(limit)
 
   res.status(httpStatus.OK).json({
     success: true,
-    total: reviews.length,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
     data: reviews,
-  });
-});
+  })
+})
+
 
 export const getReviewsByFacility = catchAsync(
   async (req: Request, res: Response) => {
