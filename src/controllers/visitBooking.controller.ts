@@ -379,24 +379,41 @@ const getSingleUserVisitBooking = catchAsync(async (req, res) => {
 })
 
 const getAllRecentBookings = catchAsync(async (req, res) => {
-  const result = await VisitBooking.find().sort({ createdAt: -1 })
+  let { page = 1, limit = 10 } = req.query;
+  page = Number(page);
+  limit = Number(limit);
+
+  const skip = (page - 1) * limit;
+  const total = await VisitBooking.countDocuments();
+
+
+  const result = await VisitBooking.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
     .populate({
       path: 'userId',
-      select:
-        'firstName lastName email subscriptionPlan createdAt',
+      select: 'firstName lastName email subscriptionPlan createdAt',
     })
     .populate({
       path: 'facility',
       select: 'name location images',
-    })
+    });
 
   return sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Your Visit Bookings retrieved successfully',
+    meta: {
+      total,               
+      page,                
+      limit,               
+      totalPages: Math.ceil(total / limit),
+    },
     data: result,
-  })
-})
+  });
+});
+
 
 
 const visitBookingController = {
