@@ -12,6 +12,21 @@ import { Facility } from '../models/facility.model'
 export const createBooking = catchAsync(async (req: Request, res: Response) => {
   const booking = await BookHome.create(req.body)
 
+  const isFacilityExists = await Facility.findById(booking.facility);
+  if (!isFacilityExists) throw new AppError(404, "Facility not found ");
+
+  if (!isFacilityExists.availability === false) {
+    throw new AppError(400, "Facility is not available for booking");
+  }
+
+  if (isFacilityExists.status === "pending") {
+    throw new AppError(400, "Facility is not approved yet");
+  }
+
+  if (isFacilityExists.status === "declined") {
+    throw new AppError(400, "Facility is not active now");
+  }
+
   await Facility.findByIdAndUpdate(booking.facility, {
     $inc: { totalPlacement: 1 },
   })
