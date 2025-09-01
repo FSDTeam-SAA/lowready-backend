@@ -1,6 +1,7 @@
 import { Router } from "express";
 import visitBookingController from "../controllers/visitBooking.controller";
 import {
+  isAdmin,
   isOrganization,
   isUser,
   protect,
@@ -28,6 +29,14 @@ router.get(
   isOrganization,
   visitBookingController.getMyFacilityBookings
 );
+
+
+router.get(
+  "/recent-bookings",
+  protect,
+  isAdmin,
+  visitBookingController.getAllRecentBookings
+)
 
 router.put(
   "/status/:bookingId",

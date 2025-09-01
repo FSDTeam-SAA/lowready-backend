@@ -378,6 +378,27 @@ const getSingleUserVisitBooking = catchAsync(async (req, res) => {
   })
 })
 
+const getAllRecentBookings = catchAsync(async (req, res) => {
+  const result = await VisitBooking.find().sort({ createdAt: -1 })
+    .populate({
+      path: 'userId',
+      select:
+        'firstName lastName email subscriptionPlan createdAt',
+    })
+    .populate({
+      path: 'facility',
+      select: 'name location images',
+    })
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Your Visit Bookings retrieved successfully',
+    data: result,
+  })
+})
+
+
 const visitBookingController = {
   createVisitBooking,
   getMyVisitBookings,
@@ -388,5 +409,6 @@ const visitBookingController = {
   rescheduleVisitBooking,
   deleteVisitBooking,
   getSingleUserVisitBooking,
+  getAllRecentBookings
 }
 export default visitBookingController
