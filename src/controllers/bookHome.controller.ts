@@ -9,6 +9,7 @@ import { User } from '../models/user.model'
 import { Facility } from '../models/facility.model'
 import { createNotification } from '../socket/notification.service'
 import mongoose from 'mongoose'
+import payment from '../models/payment'
 
 export const createBooking = catchAsync(async (req: Request, res: Response) => {
   const booking = await BookHome.create(req.body)
@@ -160,37 +161,58 @@ export const editBooking = catchAsync(async (req: Request, res: Response) => {
 
 
 export const getRecentBookings = catchAsync(async (req: Request, res: Response) => {
-  let { page = 1, limit = 10 } = req.query as any;
-
-  page = Number(page);
-  limit = Number(limit);
-
+  // 📌 Get page & limit from query (defaults: page=1, limit=10)
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
+
+  // 📌 Total count for pagination metadata
   const total = await BookHome.countDocuments();
 
+  // 📌 Fetch bookings with pagination + populate
   const bookings = await BookHome.find()
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
     .populate({
-      path: 'facility',
-      select: 'name location address',
+      path: "userId",
+      select: "firstName lastName email  street subscriptionPlan createdAt",
     })
     .populate({
-      path: 'userId',
-      select: 'firstName lastName street email phoneNumber',
+      path: "facility",
+      select: "name location address",
     });
 
+  // 📌 Add isPaid flag
+  const bookingsWithPayment = await Promise.all(
+    bookings.map(async (booking) => {
+      const isPaid = await payment.exists({
+        userId: booking.userId,
+        status: "paid",
+      });
+
+      return {
+        ...booking.toObject(),
+        isPaid: !!isPaid,
+      };
+    })
+  );
+
+  // 📌 Response with pagination metadata
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Recent Bookings fetched successfully',
+    message: "Recent bookings fetched successfully",
     meta: {
-      total,                     
-      page,                      
-      limit,                      
+      total,
+      page,
+      limit,
       totalPages: Math.ceil(total / limit),
     },
-    data: bookings,
+    data: bookingsWithPayment,
   });
 });
+
+
+
+
