@@ -33,8 +33,8 @@ router.get(
 
 router.get(
   "/recent-bookings",
-  protect,
-  isAdmin,
+  // protect,
+  // isAdmin,
   visitBookingController.getAllRecentBookings
 )
 
