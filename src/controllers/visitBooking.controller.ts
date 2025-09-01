@@ -393,7 +393,7 @@ const getAllRecentBookings = catchAsync(async (req, res) => {
     .limit(limit)
     .populate({
       path: 'userId',
-      select: 'firstName lastName email address location subscriptionPlan createdAt',
+      select: 'firstName lastName email street subscriptionPlan createdAt',
     })
     .populate({
       path: 'facility',
