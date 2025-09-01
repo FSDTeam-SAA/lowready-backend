@@ -393,7 +393,7 @@ const getAllRecentBookings = catchAsync(async (req, res) => {
     .limit(limit)
     .populate({
       path: 'userId',
-      select: 'firstName lastName email subscriptionPlan createdAt',
+      select: 'firstName lastName email address location subscriptionPlan createdAt',
     })
     .populate({
       path: 'facility',
@@ -405,9 +405,9 @@ const getAllRecentBookings = catchAsync(async (req, res) => {
     success: true,
     message: 'Your Visit Bookings retrieved successfully',
     meta: {
-      total,               
-      page,                
-      limit,               
+      total,
+      page,
+      limit,
       totalPages: Math.ceil(total / limit),
     },
     data: result,
