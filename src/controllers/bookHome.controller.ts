@@ -160,23 +160,37 @@ export const editBooking = catchAsync(async (req: Request, res: Response) => {
 
 
 export const getRecentBookings = catchAsync(async (req: Request, res: Response) => {
-  const { page, limit, skip } = getPaginationParams(req.query)
+  let { page = 1, limit = 10 } = req.query as any;
 
-  const [bookings, totalItems] = await Promise.all([
-    BookHome.find()
-      .skip(skip)
-      .limit(limit)
-      .populate('facility')
-      .populate('userId')
-      .sort({ createdAt: -1 }),
-    BookHome.countDocuments(),
-  ])
+  page = Number(page);
+  limit = Number(limit);
+
+  const skip = (page - 1) * limit;
+  const total = await BookHome.countDocuments();
+
+  const bookings = await BookHome.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate({
+      path: 'facility',
+      select: 'name location address',
+    })
+    .populate({
+      path: 'userId',
+      select: 'firstName lastName street email phoneNumber',
+    });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Recent bookings fetched successfully',
+    message: 'Recent Bookings fetched successfully',
+    meta: {
+      total,                     
+      page,                      
+      limit,                      
+      totalPages: Math.ceil(total / limit),
+    },
     data: bookings,
-    meta: buildMetaPagination(totalItems, page, limit),
-  })
-})
+  });
+});
