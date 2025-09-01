@@ -58,8 +58,8 @@ export const createCheckoutSession = async (
       quantity: 1,
     }],
     mode: 'payment',
-    success_url: `https://your-frontend.com/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `https://your-frontend.com/payment-cancel`,
+    success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.FRONTEND_URL}/payment-cancel`,
     payment_intent_data: {
       metadata: {
         type,

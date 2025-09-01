@@ -7,6 +7,7 @@ import { VisitBooking } from "../models/visitBooking.model";
 import catchAsync from "../utils/catchAsync";
 import { uploadToCloudinary } from "../utils/cloudinary";
 import sendResponse from "../utils/sendResponse";
+import payment from "../models/payment";
 
 const createFacility = catchAsync(async (req, res) => {
   try {
@@ -15,6 +16,11 @@ const createFacility = catchAsync(async (req, res) => {
     const user = await User.findById(userId);
     if (!user) {
       throw new AppError(404, "User not found");
+    }
+
+    const isPaid = await payment.findOne({ userId: userId, status: "paid" });
+    if (!isPaid) {
+      throw new AppError(400, "You must make a payment to create a facility");
     }
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
@@ -159,9 +165,9 @@ const getAllFacilities = catchAsync(async (req, res) => {
     maxPrice,
     careServices,
     amenities,
-    rating,        // ⭐ Rating filter
-    availability,  // ✅ New: availability (true/false/all)
-    status,        // ✅ New: pending, approved, rejected, etc.
+    rating,
+    availability,
+    status,
     page = 1,
     limit = 10,
   } = req.query;

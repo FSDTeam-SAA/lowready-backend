@@ -9,71 +9,6 @@ import sendResponse from '../utils/sendResponse'
 import { IFacility } from '../interface/facility.interface'
 import { IUser } from '../interface/user.interface'
 
-// const createVisitBooking = catchAsync(async (req, res) => {
-//   try {
-//     const {
-//       name,
-//       email,
-//       phoneNumber,
-//       relationWith,
-//       message,
-//       facility,
-//       visitDate,
-//       visitTime,
-//     } = req.body
-//     const { _id: userId } = req.user as any
-
-//     const user = await User.findById(userId)
-//     if (!user) throw new AppError(404, 'User not found')
-
-//     const isFacilityExists = await Facility.findById(facility)
-//     if (!isFacilityExists) throw new AppError(404, 'Facility not found')
-
-//     if (isFacilityExists.availability === false) {
-//       throw new AppError(400, 'Facility is not available for booking')
-//     }
-
-//     if (
-//       !isFacilityExists.availableTime ||
-//       !isFacilityExists.availableTime.includes(visitTime)
-//     ) {
-//       throw new AppError(
-//         400,
-//         `${visitTime} is not available. Please choose another one.`
-//       )
-//     }
-
-//     const visitBooking = await VisitBooking.create({
-//       userId,
-//       name,
-//       email,
-//       phoneNumber,
-//       relationWith,
-//       message,
-//       facility,
-//       visitDate,
-//       visitTime,
-//     })
-
-//     // 🔔 Send notification after booking
-//     await createNotification({
-//       to: userId,
-//       message: `Your tour booking for ${isFacilityExists.name} on ${visitDate} at ${visitTime} has been confirmed!`,
-//       type: 'visitBooking',
-//       id: new mongoose.Types.ObjectId(visitBooking._id),
-//     })
-
-//     return sendResponse(res, {
-//       statusCode: 200,
-//       success: true,
-//       message: 'Visit booking created successfully',
-//       data: visitBooking,
-//     })
-//   } catch (error: any) {
-//     throw new AppError(500, error.message)
-//   }
-// })
-
 const createVisitBooking = catchAsync(async (req, res) => {
   try {
     const {
@@ -91,11 +26,19 @@ const createVisitBooking = catchAsync(async (req, res) => {
     const user = await User.findById(userId)
     if (!user) throw new AppError(404, 'User not found')
 
-    const isFacilityExists = await Facility.findById(facility)
-    if (!isFacilityExists) throw new AppError(404, 'Facility not found')
+    const isFacilityExists = await Facility.findById(facility);
+    if (!isFacilityExists) throw new AppError(404, "Facility not found ");
 
     if (isFacilityExists.availability === false) {
       throw new AppError(400, 'Facility is not available for booking')
+    }
+
+    if (isFacilityExists.status === "pending") {
+      throw new AppError(400, "Facility is not approved yet");
+    }
+
+    if (isFacilityExists.status === "declined") {
+      throw new AppError(400, "Facility is not active now");
     }
 
     if (
@@ -120,35 +63,13 @@ const createVisitBooking = catchAsync(async (req, res) => {
       visitTime,
     })
 
-    // Increment total tours booked
-    await Facility.findByIdAndUpdate(facility, { $inc: { totalTour: 1 } })
-
-    /** 🔔 Notifications **/
-
-    // 1. Notify the booking user
+    // 🔔 Send notification after booking
     await createNotification({
       to: userId,
-      message: `Your tour booking for ${isFacilityExists.name} on ${visitDate} at ${visitTime} has been confirmed.`,
+      message: `Your tour booking for ${isFacilityExists.name} on ${visitDate} at ${visitTime} has been confirmed!`,
       type: 'visitBooking',
       id: new mongoose.Types.ObjectId(visitBooking._id as string),
     })
-
-    // 2. Notify the facility owner/admin
-    if (
-      isFacilityExists.userId &&
-      typeof isFacilityExists.userId === 'string'
-    ) {
-      await createNotification({
-        to: new mongoose.Types.ObjectId(isFacilityExists.userId),
-        message: `${
-          user.firstName || 'A visitor'
-        } booked a tour at your facility (${
-          isFacilityExists.name
-        }) on ${visitDate} at ${visitTime}. Message: "${message}"`,
-        type: 'visitBooking',
-        id: new mongoose.Types.ObjectId(visitBooking._id as string),
-      })
-    }
 
     return sendResponse(res, {
       statusCode: 200,
@@ -160,6 +81,8 @@ const createVisitBooking = catchAsync(async (req, res) => {
     throw new AppError(500, error.message)
   }
 })
+
+
 
 const getMyVisitBookings = catchAsync(async (req, res) => {
   const { _id: userId } = req.user as any
@@ -321,100 +244,6 @@ export const updateVisitBookingStatus = catchAsync(async (req, res) => {
   })
 })
 
-// const updateVisitBookingStatus = catchAsync(async (req, res) => {
-//   const { bookingId } = req.params
-
-//   const visitBooking = await VisitBooking.findById(bookingId)
-//   if (!visitBooking) throw new AppError(404, 'Visit booking not found')
-
-//   const result = await VisitBooking.findByIdAndUpdate(
-//     bookingId,
-//     { status: 'completed' },
-//     { new: true }
-//   )
-//     .populate({
-//       path: 'facility',
-//       select: 'name location price images',
-//     })
-//     .populate({
-//       path: 'userId',
-//       select: 'firstName lastName email phoneNumber',
-//     })
-
-//   // 🔹 If booking just got completed, increment user’s totalTour
-//   if (result?.status === 'completed') {
-//     await Facility.findByIdAndUpdate(result.facility, {
-//       $inc: { totalTour: 1 },
-//     })
-//   }
-
-//   return sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Visit booking status updated successfully',
-//     data: result,
-//   })
-// })
-
-// const updateVisitBookingStatus = catchAsync(async (req, res) => {
-//   const { bookingId } = req.params
-
-//   const visitBooking = await VisitBooking.findById(bookingId)
-//   if (!visitBooking) throw new AppError(404, 'Visit booking not found')
-
-//   const result = await VisitBooking.findByIdAndUpdate(
-//     bookingId,
-//     { status: 'completed' },
-//     { new: true }
-//   )
-//     .populate({
-//       path: 'facility',
-//       select: 'name location price images userId',
-//     })
-//     .populate({
-//       path: 'userId',
-//       select: 'firstName lastName email phoneNumber',
-//     })
-
-//   // 🔹 If booking just got completed, increment facility totalTour
-//   if (result?.status === 'completed' && result.facility?._id) {
-//     await Facility.findByIdAndUpdate(result.facility._id, {
-//       $inc: { totalTour: 1 },
-//     })
-
-//     /** 🔔 Notifications **/
-//     // 1. Notify the user
-//     await createNotification({
-//       to: result.userId._id,
-//       message: `Your visit booking for ${result.facility as any} has been marked as completed.`,
-//       type: 'visitBookingCompleted',
-//       id: new mongoose.Types.ObjectId(visitBooking._id),
-//     })
-
-//     // 2. Notify the facility owner
-//     // @ts-ignore
-//     if (result.facility.userId) {
-//       const userName =
-//         result.userId.firstName && result.userId.lastName
-//           ? `${result.userId.firstName} ${result.userId.lastName}`
-//           : result.userId.firstName || 'A visitor'
-
-//       await createNotification({
-//         to: result.facility.userId,
-//         message: `${userName}'s visit booking at ${result.facility.name} has been marked as completed.`,
-//         type: 'visitBookingCompleted',
-//         id: result._id,
-//       })
-//     }
-//   }
-
-//   return sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Visit booking status updated successfully',
-//     data: result,
-//   })
-// })
 
 const updateCancelVisitBookingStatus = catchAsync(async (req, res) => {
   const { bookingId } = req.params
@@ -549,6 +378,44 @@ const getSingleUserVisitBooking = catchAsync(async (req, res) => {
   })
 })
 
+const getAllRecentBookings = catchAsync(async (req, res) => {
+  let { page = 1, limit = 10 } = req.query;
+  page = Number(page);
+  limit = Number(limit);
+
+  const skip = (page - 1) * limit;
+  const total = await VisitBooking.countDocuments();
+
+
+  const result = await VisitBooking.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate({
+      path: 'userId',
+      select: 'firstName lastName avatars email street',
+    })
+    .populate({
+      path: 'facility',
+      select: 'name location address images',
+    });
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Your Visit Bookings retrieved successfully',
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+    data: result,
+  });
+});
+
+
+
 const visitBookingController = {
   createVisitBooking,
   getMyVisitBookings,
@@ -559,5 +426,6 @@ const visitBookingController = {
   rescheduleVisitBooking,
   deleteVisitBooking,
   getSingleUserVisitBooking,
+  getAllRecentBookings
 }
 export default visitBookingController

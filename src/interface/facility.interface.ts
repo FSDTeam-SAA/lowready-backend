@@ -5,6 +5,7 @@ export interface IFacility extends Document {
   availability: boolean
   name: string
   location: string
+  address: string
   description: string
   price: number
   userId: Types.ObjectId | IUser

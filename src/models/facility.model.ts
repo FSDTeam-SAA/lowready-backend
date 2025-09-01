@@ -6,6 +6,7 @@ const facilitySchema: Schema = new Schema<IFacility>(
     availability: { type: Boolean, default: true },
     name: { type: String, required: [true, "Name is required"] },
     location: { type: String, required: [true, "Location is required"] },
+    address: { type: String, required: [true, "Address is required"] },
     description: { type: String, required: [true, "Description is required"] },
     price: { type: Number, required: [true, "Price is required"] },
     userId: {

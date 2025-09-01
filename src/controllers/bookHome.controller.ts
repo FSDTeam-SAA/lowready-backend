@@ -9,9 +9,25 @@ import { User } from '../models/user.model'
 import { Facility } from '../models/facility.model'
 import { createNotification } from '../socket/notification.service'
 import mongoose from 'mongoose'
+import payment from '../models/payment'
 
 export const createBooking = catchAsync(async (req: Request, res: Response) => {
   const booking = await BookHome.create(req.body)
+
+  const isFacilityExists = await Facility.findById(booking.facility);
+  if (!isFacilityExists) throw new AppError(404, "Facility not found ");
+
+  if (!isFacilityExists.availability === false) {
+    throw new AppError(400, "Facility is not available for booking");
+  }
+
+  if (isFacilityExists.status === "pending") {
+    throw new AppError(400, "Facility is not approved yet");
+  }
+
+  if (isFacilityExists.status === "declined") {
+    throw new AppError(400, "Facility is not active now");
+  }
 
   await Facility.findByIdAndUpdate(booking.facility, {
     $inc: { totalPlacement: 1 },
@@ -142,3 +158,61 @@ export const editBooking = catchAsync(async (req: Request, res: Response) => {
     data: booking,
   })
 })
+
+
+export const getRecentBookings = catchAsync(async (req: Request, res: Response) => {
+  // 📌 Get page & limit from query (defaults: page=1, limit=10)
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // 📌 Total count for pagination metadata
+  const total = await BookHome.countDocuments();
+
+  // 📌 Fetch bookings with pagination + populate
+  const bookings = await BookHome.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .populate({
+      path: "userId",
+      select: "firstName lastName email  street subscriptionPlan createdAt",
+    })
+    .populate({
+      path: "facility",
+      select: "name location address",
+    });
+
+  // 📌 Add isPaid flag
+  const bookingsWithPayment = await Promise.all(
+    bookings.map(async (booking) => {
+      const isPaid = await payment.exists({
+        userId: booking.userId,
+        status: "paid",
+      });
+
+      return {
+        ...booking.toObject(),
+        isPaid: !!isPaid,
+      };
+    })
+  );
+
+  // 📌 Response with pagination metadata
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Recent bookings fetched successfully",
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+    data: bookingsWithPayment,
+  });
+});
+
+
+
+

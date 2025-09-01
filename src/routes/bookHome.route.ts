@@ -6,6 +6,7 @@ import {
   getBookingsByUser,
   getBooking,
   editBooking,
+  getRecentBookings,
 } from '../controllers/bookHome.controller'
 
 import { protect, isAdmin } from '../middlewares/auth.middleware'
@@ -14,6 +15,7 @@ const router = express.Router()
 
 router.post('/', protect, createBooking)
 router.get('/', protect, isAdmin, getAllBookings)
+router.get("/recent-home-bookings",  getRecentBookings)
 router.get('/facility/:facilityId', protect, getBookingsByFacility)
 router.get('/user/:userId', protect, getBookingsByUser)
 router.get('/:id', protect, getBooking)
