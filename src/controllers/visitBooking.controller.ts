@@ -397,7 +397,7 @@ const getAllRecentBookings = catchAsync(async (req, res) => {
     })
     .populate({
       path: 'facility',
-      select: 'name location images',
+      select: 'name location address images',
     });
 
   return sendResponse(res, {
