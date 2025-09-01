@@ -15,7 +15,7 @@ const router = express.Router()
 
 router.post('/', protect, createBooking)
 router.get('/', protect, isAdmin, getAllBookings)
-router.get("/recent-home-bookings", getRecentBookings)
+router.get("/recent-home-bookings", protect, isAdmin, getRecentBookings)
 router.get('/facility/:facilityId', protect, getBookingsByFacility)
 router.get('/user/:userId', protect, getBookingsByUser)
 router.get('/:id', protect, getBooking)
