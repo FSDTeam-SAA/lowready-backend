@@ -12,41 +12,45 @@ import mongoose from 'mongoose'
 import payment from '../models/payment'
 
 export const createBooking = catchAsync(async (req: Request, res: Response) => {
-  const booking = await BookHome.create(req.body)
+  try {
+    const booking = await BookHome.create(req.body)
 
-  const isFacilityExists = await Facility.findById(booking.facility);
-  if (!isFacilityExists) throw new AppError(404, "Facility not found ");
+    const isFacilityExists = await Facility.findById(booking.facility);
+    if (!isFacilityExists) throw new AppError(404, "Facility not found ");
 
-  if (isFacilityExists.availability === false) {
-    throw new AppError(400, "Facility is not available for booking");
+    if (isFacilityExists.availability === false) {
+      throw new AppError(400, "Facility is not available for booking");
+    }
+
+    if (isFacilityExists.status === "pending") {
+      throw new AppError(400, "Facility is not approved yet");
+    }
+
+    if (isFacilityExists.status === "declined") {
+      throw new AppError(400, "Facility is not active now");
+    }
+
+    await Facility.findByIdAndUpdate(booking.facility, {
+      $inc: { totalPlacement: 1 },
+    })
+
+    // 🔔 Create and send notification to the booking user
+    await createNotification({
+      to: booking.userId, // assuming booking.userId exists
+      message: `Your booking for ${Facility.name} has been confirmed!`,
+      type: 'booking',
+      id: booking._id as mongoose.Types.ObjectId,
+    })
+
+    sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      success: true,
+      message: 'Booking created successfully',
+      data: booking,
+    })
+  } catch (error) {
+    throw new AppError(httpStatus.BAD_REQUEST, (error as Error).message)
   }
-
-  if (isFacilityExists.status === "pending") {
-    throw new AppError(400, "Facility is not approved yet");
-  }
-
-  if (isFacilityExists.status === "declined") {
-    throw new AppError(400, "Facility is not active now");
-  }
-
-  await Facility.findByIdAndUpdate(booking.facility, {
-    $inc: { totalPlacement: 1 },
-  })
-
-  // 🔔 Create and send notification to the booking user
-  await createNotification({
-    to: booking.userId, // assuming booking.userId exists
-    message: `Your booking for ${Facility.name} has been confirmed!`,
-    type: 'booking',
-    id: booking._id as mongoose.Types.ObjectId,
-  })
-
-  sendResponse(res, {
-    statusCode: httpStatus.CREATED,
-    success: true,
-    message: 'Booking created successfully',
-    data: booking,
-  })
 })
 
 export const getAllBookings = catchAsync(
