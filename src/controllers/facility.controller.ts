@@ -434,9 +434,8 @@ const updateFacility = catchAsync(async (req, res) => {
       message: "Facility updated successfully",
       data: updatedFacility,
     });
-  } catch (error) {
-    console.error(error);
-    throw new AppError(500, "Failed to update facility");
+  } catch (error: any) {
+    throw new AppError(500, error.message);
   }
 });
 
