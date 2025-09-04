@@ -7,6 +7,7 @@ import {
   getBooking,
   editBooking,
   getRecentBookings,
+  deleteBooking,
 } from "../controllers/bookHome.controller";
 
 import { protect, isAdmin } from "../middlewares/auth.middleware";
@@ -20,6 +21,6 @@ router.get("/facility/:facilityId", protect, getBookingsByFacility);
 router.get("/user/:userId", protect, getBookingsByUser);
 router.get("/:id", protect, getBooking);
 router.patch("/:id", protect, editBooking);
-router.delete("/:id", editBooking);
+router.delete("/:id", deleteBooking);
 
 export default router;
