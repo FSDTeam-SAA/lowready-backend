@@ -45,7 +45,7 @@ export const isOrganization = (
   next: NextFunction
 ): void => {
   if (req.user?.role !== "organization") {
-    throw new AppError(403, "Access denied. You are not an driver.");
+    throw new AppError(403, "Access denied. You are not an organization.");
   }
   next();
 };

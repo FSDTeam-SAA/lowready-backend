@@ -156,7 +156,12 @@ const getMyFacilityBookings = catchAsync(async (req, res) => {
     VisitBooking.find(filter)
       .populate({
         path: 'userId',
-        select: 'firstName lastName email phoneNumber',
+        select: 'firstName lastName email',
+      })
+      .populate({
+        path: 'facility',
+        model: 'Facility', // ✅ explicitly set model
+        select: 'name location address',
       })
       .skip(skip)
       .limit(limit)

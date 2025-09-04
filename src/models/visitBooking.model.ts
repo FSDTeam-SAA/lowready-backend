@@ -12,7 +12,7 @@ const visitBookingSchema: Schema = new Schema<IVisitBooking>(
     phoneNumber: { type: String, required: [true, "Phone number is required"] },
     relationWith: { type: String, required: [true, "Relation is required"] },
     message: { type: String, required: [true, "Message is required"] },
-    facility: { type: Schema.Types.ObjectId, ref: "Facility" },
+    facility: { type: Schema.Types.ObjectId, ref: "Facility", required: [true, "Facility is required"] },
     visitDate: { type: Date, required: [true, "Visit date is required"] },
     visitTime: { type: String, required: [true, "Visit time is required"] },
     rating: { type: Number, max: 5, default: 0 },

@@ -135,14 +135,14 @@ const createFacility = catchAsync(async (req, res) => {
       message: "Facility created successfully",
       data: facility,
     });
-  } catch (error) {
-    console.log({ error });
-    throw new AppError(500, "Failed to create facility");
+  } catch (error: any) {
+    throw new AppError(500, error.message);
   }
 });
 
 const getMyFacilities = catchAsync(async (req, res) => {
   const { _id: userId } = req.user as any;
+
 
   const facilities = await Facility.find({ userId }).populate({
     path: "userId",
@@ -434,9 +434,8 @@ const updateFacility = catchAsync(async (req, res) => {
       message: "Facility updated successfully",
       data: updatedFacility,
     });
-  } catch (error) {
-    console.error(error);
-    throw new AppError(500, "Failed to update facility");
+  } catch (error: any) {
+    throw new AppError(500, error.message);
   }
 });
 
