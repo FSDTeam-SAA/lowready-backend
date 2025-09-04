@@ -238,4 +238,4 @@ export const getSingleReview = catchAsync(async (req: Request, res: Response) =>
     message: "Review get successfully",
     data: review,
   });
-})
+});
