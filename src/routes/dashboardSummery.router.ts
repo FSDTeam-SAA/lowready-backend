@@ -2,6 +2,7 @@ import { Router } from 'express'
 import dashboardSummeryController, {
   getMonthlyEarnings,
 } from '../controllers/dashboardSummery'
+import { isOrganization, protect } from '../middlewares/auth.middleware'
 
 const router = Router()
 
@@ -10,6 +11,14 @@ router.get(
   dashboardSummeryController.getAdminDashboardSummery
 )
 router.get('/admin-dashboard/total/earnings', getMonthlyEarnings)
+
+// organization dashboard statistic data
+router.get(
+  '/org-dashboard',
+  protect,
+  isOrganization,
+  dashboardSummeryController.getOrgDashboardStaticData
+)
 
 const dashboardSummeryRouter = router
 export default dashboardSummeryRouter
