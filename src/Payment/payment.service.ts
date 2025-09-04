@@ -42,7 +42,17 @@ export const createCheckoutSession = async (
     const plan = await SubscriptionPlan.findById(referenceId);
     if (!plan || !plan.isActive) throw new Error('Subscription plan not found or inactive');
 
-    lineItemAmount = (billingCycle === 'yearly' ? (amount || plan.price * 12) : (amount || plan.price)) * 100;
+   const planPriceCents = Math.round(plan.price * 100); // ✅ normalize once
+
+    if (billingCycle === 'yearly') {
+      lineItemAmount = amount
+        ? Math.round(amount * 100) 
+        : planPriceCents * 12;
+    } else {
+      lineItemAmount = amount
+        ? Math.round(amount * 100)
+        : planPriceCents;
+    };
     lineItemName = `${plan.name} (${billingCycle})`;
   }
 
