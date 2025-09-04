@@ -20,5 +20,12 @@ router.get(
   dashboardSummeryController.getOrgDashboardStaticData
 )
 
+router.get(
+  '/org-dashboard/total/earnings',
+  protect,
+  isOrganization,
+  dashboardSummeryController.getOrgMonthlyfororgEarnings
+)
+
 const dashboardSummeryRouter = router
 export default dashboardSummeryRouter
