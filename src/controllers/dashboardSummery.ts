@@ -188,7 +188,7 @@ export const getOrgDashboardStaticData = async (
     lastMonth.setMonth(today.getMonth() - 1) // last 30 days
 
     // ✅ Upcoming Tours (only from last month forward)
-    const upcomingTours = await VisitBooking.find({
+    const upcomingTours = await VisitBooking.countDocuments({
       organizationId: userId,
       date: { $gte: lastMonth, $lte: today },
     }).sort({ date: 1 })
