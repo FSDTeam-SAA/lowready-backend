@@ -236,9 +236,65 @@ export const getOrgDashboardStaticData = async (
   }
 }
 
+export const getOrgMonthlyfororgEarnings = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id
+    if (!userId) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'User not found')
+    }
+
+    const year = Number(req.query.year) || new Date().getFullYear()
+
+    const earnings = await payment.aggregate([
+      // ✅ Only include paid payments for this organization
+      { $match: { status: 'paid', userId } },
+
+      // ✅ Extract year and month
+      {
+        $addFields: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+        },
+      },
+
+      // ✅ Filter by requested year
+      { $match: { year } },
+
+      // ✅ Group by month
+      {
+        $group: {
+          _id: '$month',
+          totalEarnings: { $sum: '$amount' },
+        },
+      },
+
+      // ✅ Sort by month
+      { $sort: { _id: 1 } },
+    ])
+
+    // ✅ Format result to always return 12 months
+    const formattedEarnings = Array.from({ length: 12 }, (_, i) => {
+      const monthData = earnings.find((e) => e._id === i + 1)
+      return {
+        month: i + 1,
+        totalEarnings: monthData ? monthData.totalEarnings : 0,
+      }
+    })
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Organization monthly earnings fetched successfully',
+      data: formattedEarnings,
+    })
+  }
+)
+
+
 const dashboardSummeryController = {
   getAdminDashboardSummery,
   getOrgDashboardStaticData,
+  getOrgMonthlyfororgEarnings,
 }
 
 export default dashboardSummeryController
