@@ -1,4 +1,4 @@
-import express from 'express'
+import express from "express";
 import {
   createBooking,
   getAllBookings,
@@ -7,18 +7,19 @@ import {
   getBooking,
   editBooking,
   getRecentBookings,
-} from '../controllers/bookHome.controller'
+} from "../controllers/bookHome.controller";
 
-import { protect, isAdmin } from '../middlewares/auth.middleware'
+import { protect, isAdmin } from "../middlewares/auth.middleware";
 
-const router = express.Router()
+const router = express.Router();
 
-router.post('/', protect, createBooking)
-router.get('/', protect, isAdmin, getAllBookings)
-router.get("/recent-home-bookings",  getRecentBookings)
-router.get('/facility/:facilityId', protect, getBookingsByFacility)
-router.get('/user/:userId', protect, getBookingsByUser)
-router.get('/:id', protect, getBooking)
-router.patch('/:id', protect, editBooking)
+router.post("/", protect, createBooking);
+router.get("/", protect, isAdmin, getAllBookings);
+router.get("/recent-home-bookings", getRecentBookings);
+router.get("/facility/:facilityId", protect, getBookingsByFacility);
+router.get("/user/:userId", protect, getBookingsByUser);
+router.get("/:id", protect, getBooking);
+router.patch("/:id", protect, editBooking);
+router.delete("/:id", editBooking);
 
-export default router
+export default router;
