@@ -8,7 +8,8 @@ import {
   editBooking,
   getRecentBookings,
   deleteBooking,
-} from "../controllers/bookHome.controller";
+  getBookingsByOrganization,
+} from '../controllers/bookHome.controller'
 
 import { protect, isAdmin } from "../middlewares/auth.middleware";
 
@@ -23,4 +24,7 @@ router.get("/:id", protect, getBooking);
 router.patch("/:id", protect, editBooking);
 router.delete("/:id", deleteBooking);
 
-export default router;
+// organization id (userId) get all apis 
+router.get('/organization/:orgId', getBookingsByOrganization)
+
+export default router
