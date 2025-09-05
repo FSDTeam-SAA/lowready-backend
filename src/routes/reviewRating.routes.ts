@@ -28,6 +28,6 @@ router.get(
   reviewRatingDashboard
 );
 router.put("/:id", updateReview);
-router.delete("/:id", protect, isAdmin, deleteReview);
+router.delete("/:id", protect, isOrganization, deleteReview);
 
 export default router;
