@@ -27,5 +27,13 @@ router.get(
   dashboardSummeryController.getOrgMonthlyfororgEarnings
 )
 
+router.get(
+  '/referral/saving',
+  protect,
+  isOrganization,
+  dashboardSummeryController.referralSaving
+)
+
+
 const dashboardSummeryRouter = router
 export default dashboardSummeryRouter
