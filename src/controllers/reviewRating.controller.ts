@@ -7,7 +7,6 @@ import sendResponse from "../utils/sendResponse";
 import mongoose from "mongoose";
 import { Facility } from "../models/facility.model";
 
-
 export const createReview = catchAsync(async (req: Request, res: Response) => {
   const { userId, facility, star, comment } = req.body;
 
@@ -25,9 +24,9 @@ export const createReview = catchAsync(async (req: Request, res: Response) => {
       $group: {
         _id: "$facility",
         avgRating: { $avg: "$star" },
-        ratingCount: { $sum: 1 }
-      }
-    }
+        ratingCount: { $sum: 1 },
+      },
+    },
   ]);
 
   let newAvgRating = stats.length > 0 ? stats[0].avgRating : 0;
@@ -38,7 +37,7 @@ export const createReview = catchAsync(async (req: Request, res: Response) => {
   // 🔹 Update Facility with both values
   await Facility.findByIdAndUpdate(facility, {
     rating: newAvgRating,
-    ratingCount: newRatingCount
+    ratingCount: newRatingCount,
   });
 
   res.status(httpStatus.CREATED).json({
@@ -47,8 +46,8 @@ export const createReview = catchAsync(async (req: Request, res: Response) => {
     data: {
       review,
       rating: newAvgRating,
-      ratingCount: newRatingCount
-    }
+      ratingCount: newRatingCount,
+    },
   });
 });
 
@@ -66,22 +65,32 @@ export const getAllReviews = catchAsync(async (req: Request, res: Response) => {
 
 export const getReviewsByFacility = catchAsync(
   async (req: Request, res: Response) => {
-    const { facilityId } = req.params;
+    const { _id: userId }: any = req.user;
+
+    const facilities = await Facility.find({ userId }).select("_id");
+    if (!facilities.length) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        "No facilities found for this user"
+      );
+    }
+
+    const facilityIds = facilities.map((f) => f._id);
 
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Fetch reviews with pagination
-    const reviews = await ReviewRating.find({ facility: facilityId })
+    const reviews = await ReviewRating.find({ facility: { $in: facilityIds } })
       .populate("userId", "firstName lastName email")
       .populate("facility", "name address")
       .skip(skip)
       .limit(limit)
-      .sort({ createdAt: -1 }); // newest first
+      .sort({ createdAt: -1 });
 
-    // Count total reviews for this facility
-    const total = await ReviewRating.countDocuments({ facility: facilityId });
+    const total = await ReviewRating.countDocuments({
+      facility: { $in: facilityIds },
+    });
 
     return sendResponse(res, {
       statusCode: httpStatus.OK,
@@ -97,7 +106,6 @@ export const getReviewsByFacility = catchAsync(
     });
   }
 );
-
 
 export const updateReview = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -120,9 +128,9 @@ export const updateReview = catchAsync(async (req: Request, res: Response) => {
       $group: {
         _id: "$facility",
         avgRating: { $avg: "$star" },
-        ratingCount: { $sum: 1 }
-      }
-    }
+        ratingCount: { $sum: 1 },
+      },
+    },
   ]);
 
   let newAvgRating = stats.length > 0 ? stats[0].avgRating : 0;
@@ -133,7 +141,7 @@ export const updateReview = catchAsync(async (req: Request, res: Response) => {
   // 🔹 Update facility with both rating + ratingCount
   await Facility.findByIdAndUpdate(updatedReview.facility, {
     rating: newAvgRating,
-    ratingCount: newRatingCount
+    ratingCount: newRatingCount,
   });
 
   res.status(httpStatus.OK).json({
@@ -142,8 +150,8 @@ export const updateReview = catchAsync(async (req: Request, res: Response) => {
     data: {
       review: updatedReview,
       rating: newAvgRating,
-      ratingCount: newRatingCount
-    }
+      ratingCount: newRatingCount,
+    },
   });
 });
 
@@ -163,12 +171,21 @@ export const deleteReview = catchAsync(async (req, res) => {
 });
 
 export const reviewRatingDashboard = catchAsync(async (req, res) => {
-  const { facilityId } = req.params;
+  const { _id: userId }: any = req.user;
 
-  // Aggregate reviews for the specific facility
+  const facilities = await Facility.find({ userId }).select("_id");
+  if (!facilities.length) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "No facilities found for this user"
+    );
+  }
+
+  const facilityIds = facilities.map((f) => f._id);
+
   const ratingStats = await ReviewRating.aggregate([
     {
-      $match: { facility: new mongoose.Types.ObjectId(facilityId) }, // filter by facilityId
+      $match: { facility: { $in: facilityIds } }, 
     },
     {
       $group: {
@@ -179,7 +196,7 @@ export const reviewRatingDashboard = catchAsync(async (req, res) => {
     { $sort: { _id: -1 } },
   ]);
 
-  // Always return all 1-5 stars (default 0 if not found)
+
   const ratingSummary: Record<number, number> = {
     5: 0,
     4: 0,
@@ -205,19 +222,20 @@ export const reviewRatingDashboard = catchAsync(async (req, res) => {
   });
 });
 
+export const getSingleReview = catchAsync(
+  async (req: Request, res: Response) => {
+    const { reviewId } = req.params;
 
-export const getSingleReview = catchAsync(async (req: Request, res: Response) => {
-  const { reviewId } = req.params;
+    const review = await ReviewRating.findById(reviewId);
+    if (!review) {
+      throw new AppError(httpStatus.NOT_FOUND, "Review not found");
+    }
 
-  const review = await ReviewRating.findById(reviewId)
-  if (!review) {
-    throw new AppError(httpStatus.NOT_FOUND, "Review not found");
+    return sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Review get successfully",
+      data: review,
+    });
   }
-
-  return sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Review get successfully",
-    data: review,
-  });
-})
+);
