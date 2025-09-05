@@ -15,19 +15,19 @@ export const createBooking = catchAsync(async (req: Request, res: Response) => {
   try {
     const booking = await BookHome.create(req.body)
 
-    const isFacilityExists = await Facility.findById(booking.facility);
-    if (!isFacilityExists) throw new AppError(404, "Facility not found ");
+    const isFacilityExists = await Facility.findById(booking.facility)
+    if (!isFacilityExists) throw new AppError(404, 'Facility not found ')
 
     if (isFacilityExists.availability === false) {
-      throw new AppError(400, "Facility is not available for booking");
+      throw new AppError(400, 'Facility is not available for booking')
     }
 
-    if (isFacilityExists.status === "pending") {
-      throw new AppError(400, "Facility is not approved yet");
+    if (isFacilityExists.status === 'pending') {
+      throw new AppError(400, 'Facility is not approved yet')
     }
 
-    if (isFacilityExists.status === "declined") {
-      throw new AppError(400, "Facility is not active now");
+    if (isFacilityExists.status === 'declined') {
+      throw new AppError(400, 'Facility is not active now')
     }
 
     await Facility.findByIdAndUpdate(booking.facility, {
@@ -163,60 +163,95 @@ export const editBooking = catchAsync(async (req: Request, res: Response) => {
   })
 })
 
+export const getRecentBookings = catchAsync(
+  async (req: Request, res: Response) => {
+    // 📌 Get page & limit from query (defaults: page=1, limit=10)
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+    const skip = (page - 1) * limit
 
-export const getRecentBookings = catchAsync(async (req: Request, res: Response) => {
-  // 📌 Get page & limit from query (defaults: page=1, limit=10)
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
+    // 📌 Total count for pagination metadata
+    const total = await BookHome.countDocuments()
 
-  // 📌 Total count for pagination metadata
-  const total = await BookHome.countDocuments();
+    // 📌 Fetch bookings with pagination + populate
+    const bookings = await BookHome.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate({
+        path: 'userId',
+        select: 'firstName lastName email  street subscriptionPlan createdAt',
+      })
+      .populate({
+        path: 'facility',
+        select: 'name location address',
+      })
 
-  // 📌 Fetch bookings with pagination + populate
-  const bookings = await BookHome.find()
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .populate({
-      path: "userId",
-      select: "firstName lastName email  street subscriptionPlan createdAt",
+    // 📌 Add isPaid flag
+    const bookingsWithPayment = await Promise.all(
+      bookings.map(async (booking) => {
+        const isPaid = await payment.exists({
+          userId: booking.userId,
+          status: 'paid',
+        })
+
+        return {
+          ...booking.toObject(),
+          isPaid: !!isPaid,
+        }
+      })
+    )
+
+    // 📌 Response with pagination metadata
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Recent bookings fetched successfully',
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+      data: bookingsWithPayment,
     })
-    .populate({
-      path: "facility",
-      select: "name location address",
-    });
+  }
+)
 
-  // 📌 Add isPaid flag
-  const bookingsWithPayment = await Promise.all(
-    bookings.map(async (booking) => {
-      const isPaid = await payment.exists({
-        userId: booking.userId,
-        status: "paid",
-      });
+export const getBookingsByOrganization = catchAsync(
+  async (req: Request, res: Response) => {
+    const { page, limit, skip } = getPaginationParams(req.query)
+    const { orgId } = req.params // organization (facility owner) ID
 
-      return {
-        ...booking.toObject(),
-        isPaid: !!isPaid,
-      };
+    // Step 1: Find all facilities owned by this organization
+    const facilities = await Facility.find({ userId: orgId }).select('_id')
+    if (!facilities.length) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        'No facilities found for this organization'
+      )
+    }
+
+    const facilityIds = facilities.map((f) => f._id)
+
+    // Step 2: Find all bookings linked to these facilities
+    const [bookings, totalItems] = await Promise.all([
+      BookHome.find({ facility: { $in: facilityIds } })
+        .skip(skip)
+        .limit(limit)
+        .populate('facility')
+        .populate('userId')
+        .sort({ createdAt: -1 }),
+      BookHome.countDocuments({ facility: { $in: facilityIds } }),
+    ])
+
+    // Step 3: Send response
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Organization bookings fetched successfully',
+      data: bookings,
+      meta: buildMetaPagination(totalItems, page, limit),
     })
-  );
-
-  // 📌 Response with pagination metadata
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Recent bookings fetched successfully",
-    meta: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    },
-    data: bookingsWithPayment,
-  });
-});
-
-
-
-
+  }
+)

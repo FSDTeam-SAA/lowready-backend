@@ -7,6 +7,7 @@ import {
   getBooking,
   editBooking,
   getRecentBookings,
+  getBookingsByOrganization,
 } from '../controllers/bookHome.controller'
 
 import { protect, isAdmin } from '../middlewares/auth.middleware'
@@ -20,5 +21,8 @@ router.get('/facility/:facilityId', protect, getBookingsByFacility)
 router.get('/user/:userId', protect, getBookingsByUser)
 router.get('/:id', protect, getBooking)
 router.patch('/:id', protect, editBooking)
+
+// organization id (userId) get all apis 
+router.get('/organization/:orgId', getBookingsByOrganization)
 
 export default router
