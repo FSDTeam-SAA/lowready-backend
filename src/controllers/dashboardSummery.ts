@@ -1,3 +1,4 @@
+import AppError from '../errors/AppError'
 import { BookHome } from '../models/bookHome.model'
 import { Facility } from '../models/facility.model'
 import payment from '../models/payment'
@@ -6,6 +7,7 @@ import { VisitBooking } from '../models/visitBooking.model'
 import catchAsync from '../utils/catchAsync'
 import sendResponse from '../utils/sendResponse'
 import { Request, Response } from 'express'
+import  httpStatus  from 'http-status';
 
 const getAdminDashboardSummery = catchAsync(async (req, res) => {
     const now = new Date()
@@ -168,8 +170,131 @@ export const getMonthlyEarnings = catchAsync(
     }
 )
 
+
+// GET Org Dashboard Stats
+export const getOrgDashboardStaticData = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = req.user?._id
+    if (!userId) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'User not found')
+    }
+
+    // 🔹 Last Month Range
+    const today = new Date()
+    const lastMonth = new Date()
+    lastMonth.setMonth(today.getMonth() - 1) // last 30 days
+
+    // ✅ Upcoming Tours (only from last month forward)
+    const upcomingTours = await VisitBooking.countDocuments({
+      organizationId: userId,
+      date: { $gte: lastMonth, $lte: today },
+    }).sort({ date: 1 })
+
+    // ✅ Total Bookings in last month
+    const totalBookings = await BookHome.countDocuments({
+      createdAt: { $gte: lastMonth, $lte: today },
+    })
+
+    // ✅ Total Earnings in last month
+    const totalEarningsAgg = await payment.aggregate([
+      {
+        $match: {
+          userId,
+          status: 'paid',
+          createdAt: { $gte: lastMonth, $lte: today },
+        },
+      },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ])
+    const totalEarnings =
+      totalEarningsAgg.length > 0 ? totalEarningsAgg[0].total : 0
+
+    // ✅ Residents Served in last month
+    const residentsServedAgg = await BookHome.aggregate([
+      { $match: { createdAt: { $gte: lastMonth, $lte: today } } },
+      { $unwind: '$residentialInfo' },
+      { $count: 'totalResidents' },
+    ])
+    const residentsServed =
+      residentsServedAgg.length > 0 ? residentsServedAgg[0].totalResidents : 0
+
+    // ✅ Final Response
+    res.status(200).json({
+      success: true,
+      data: {
+        upcomingTours,
+        totalBookings,
+        totalEarnings,
+        residentsServed,
+      },
+    })
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message })
+  }
+}
+
+export const getOrgMonthlyfororgEarnings = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id
+    if (!userId) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'User not found')
+    }
+
+    const year = Number(req.query.year) || new Date().getFullYear()
+
+    const earnings = await payment.aggregate([
+      // ✅ Only include paid payments for this organization
+      { $match: { status: 'paid', userId } },
+
+      // ✅ Extract year and month
+      {
+        $addFields: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+        },
+      },
+
+      // ✅ Filter by requested year
+      { $match: { year } },
+
+      // ✅ Group by month
+      {
+        $group: {
+          _id: '$month',
+          totalEarnings: { $sum: '$amount' },
+        },
+      },
+
+      // ✅ Sort by month
+      { $sort: { _id: 1 } },
+    ])
+
+    // ✅ Format result to always return 12 months
+    const formattedEarnings = Array.from({ length: 12 }, (_, i) => {
+      const monthData = earnings.find((e) => e._id === i + 1)
+      return {
+        month: i + 1,
+        totalEarnings: monthData ? monthData.totalEarnings : 0,
+      }
+    })
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Organization monthly earnings fetched successfully',
+      data: formattedEarnings,
+    })
+  }
+)
+
+
 const dashboardSummeryController = {
-    getAdminDashboardSummery,
+  getAdminDashboardSummery,
+  getOrgDashboardStaticData,
+  getOrgMonthlyfororgEarnings,
 }
 
 export default dashboardSummeryController
