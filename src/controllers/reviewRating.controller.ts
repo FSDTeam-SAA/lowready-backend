@@ -258,10 +258,3 @@ export const getSingleReview = catchAsync(
   }
 );
 
-  return sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Review get successfully",
-    data: review,
-  });
-});
