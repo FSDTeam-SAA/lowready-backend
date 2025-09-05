@@ -218,6 +218,23 @@ export const getRecentBookings = catchAsync(
   }
 )
 
+export const deleteBooking = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params
+  const booking = await BookHome.findById(id)
+
+  if (!booking) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Booking not found')
+  }
+
+  await BookHome.findByIdAndDelete(id)
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Booking deleted successfully',
+  })
+})
+
 export const getBookingsByOrganization = catchAsync(
   async (req: Request, res: Response) => {
     const { page, limit, skip } = getPaginationParams(req.query)
