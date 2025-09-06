@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from 'express'
 import {
   createReview,
   getAllReviews,
@@ -7,27 +7,29 @@ import {
   deleteReview,
   reviewRatingDashboard,
   getSingleReview,
-} from "../controllers/reviewRating.controller";
+  getReviewsByFacilityId,
+} from '../controllers/reviewRating.controller'
 import {
   isAdmin,
   isOrganization,
   protect,
-} from "../middlewares/auth.middleware";
+} from '../middlewares/auth.middleware'
 
-const router = Router();
+const router = Router()
 
-router.post("/", createReview);
-router.get("/", getAllReviews);
-router.get("/:reviewId", getSingleReview);
-router.get("/facility/all", protect, isOrganization, getReviewsByFacility);
+router.post('/', createReview)
+router.get('/', getAllReviews)
+router.get('/:reviewId', getSingleReview)
+router.get('/facility/all', protect, isOrganization, getReviewsByFacility)
 
 router.get(
-  "/summary/all-reviews",
+  '/summary/all-reviews',
   protect,
   isOrganization,
   reviewRatingDashboard
-);
-router.put("/:id", updateReview);
-router.delete("/:id", protect, isOrganization, deleteReview);
+)
+router.put('/:id', updateReview)
+router.delete('/:id', protect, isOrganization, deleteReview)
+router.get('/facility/:facilityId', getReviewsByFacilityId)
 
-export default router;
+export default router
