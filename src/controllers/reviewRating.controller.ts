@@ -297,3 +297,59 @@ export const getReviewsByFacilityId = catchAsync(
     })
   }
 )
+
+
+export const getFacilityReviewSummary = catchAsync(
+  async (req: Request, res: Response) => {
+    const { facilityId } = req.params
+
+    // Check facility exists
+    const facility = await Facility.findById(facilityId)
+    if (!facility) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Facility not found')
+    }
+
+    // Aggregate review counts by star
+    const reviewStats = await ReviewRating.aggregate([
+      { $match: { facility: new mongoose.Types.ObjectId(facilityId) } },
+      {
+        $group: {
+          _id: '$star',
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: -1 } }, // highest stars first
+    ])
+
+    // Format result to always include 1–5 stars, even if 0 count
+    const starCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    reviewStats.forEach((stat) => {
+      starCounts[stat._id] = stat.count
+    })
+
+    // Calculate total reviews + average rating
+    const totalReviews = Object.values(starCounts).reduce((a, b) => a + b, 0)
+    const averageRating =
+      totalReviews > 0
+        ? (
+            Object.entries(starCounts).reduce(
+              (sum, [star, count]) => sum + Number(star) * count,
+              0
+            ) / totalReviews
+          ).toFixed(2)
+        : 0
+
+    return sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Facility review summary fetched successfully',
+      data: {
+        facilityId,
+        facilityName: facility.name,
+        starCounts,
+        totalReviews,
+        averageRating,
+      },
+    })
+  }
+)

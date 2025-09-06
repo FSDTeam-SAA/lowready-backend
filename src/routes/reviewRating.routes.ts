@@ -8,6 +8,7 @@ import {
   reviewRatingDashboard,
   getSingleReview,
   getReviewsByFacilityId,
+  getFacilityReviewSummary,
 } from '../controllers/reviewRating.controller'
 import {
   isAdmin,
@@ -31,5 +32,7 @@ router.get(
 router.put('/:id', updateReview)
 router.delete('/:id', protect, isOrganization, deleteReview)
 router.get('/facility/:facilityId', getReviewsByFacilityId)
+router.get('/facility/count/:facilityId', getFacilityReviewSummary)
+
 
 export default router
