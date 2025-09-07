@@ -242,12 +242,12 @@ export const getBookingsByOrganization = catchAsync(
 
     // Step 1: Find all facilities owned by this organization
     const facilities = await Facility.find({ userId: orgId }).select('_id')
-    if (!facilities.length) {
-      throw new AppError(
-        httpStatus.NOT_FOUND,
-        'No facilities found for this organization'
-      )
-    }
+    // if (!facilities.length) {
+    //   throw new AppError(
+    //     httpStatus.NOT_FOUND,
+    //     'No facilities found for this organization'
+    //   )
+    // }
 
     const facilityIds = facilities.map((f) => f._id)
 
