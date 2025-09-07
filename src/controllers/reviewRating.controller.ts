@@ -86,12 +86,12 @@ export const getReviewsByFacility = catchAsync(
     const { _id: userId }: any = req.user;
 
     const facilities = await Facility.find({ userId }).select("_id");
-    if (!facilities.length) {
-      throw new AppError(
-        httpStatus.NOT_FOUND,
-        "No facilities found for this user"
-      );
-    }
+    // if (!facilities.length) {
+    //   throw new AppError(
+    //     httpStatus.NOT_FOUND,
+    //     "No facilities found for this user"
+    //   );
+    // }
 
     const facilityIds = facilities.map((f) => f._id);
 
