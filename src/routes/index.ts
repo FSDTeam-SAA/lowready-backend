@@ -7,7 +7,6 @@ import contactUsRouter from './contactUs.router'
 import visitBookingRouter from './visitBooking.router'
 import bookingRouter from './bookHome.route'
 
-import docuementRouter from './document.routes'
 import documentRouter from './document.routes'
 import accountRoutes from './account.routes'
 
@@ -16,6 +15,7 @@ import newsLetterRouter from './newsLetter.route'
 import dashboardSummeryRouter from './dashboardSummery.router'
 import subscription from '../subscription/subscription.routes'
 import payment from '../Payment/payment.routes'
+import faqRouter from './faq.routes'
 
 
 
@@ -82,7 +82,7 @@ const moduleRoutes = [
   },
   {
     path: '/faq',
-    route: docuementRouter
+    route: faqRouter
   }
 ]
 
