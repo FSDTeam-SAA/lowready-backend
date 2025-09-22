@@ -80,6 +80,10 @@ const moduleRoutes = [
     path: '/payment',
     route: payment,
   },
+  {
+    path: '/faq',
+    route: docuementRouter
+  }
 ]
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route))
