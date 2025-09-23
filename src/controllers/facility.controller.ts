@@ -143,7 +143,6 @@ const createFacility = catchAsync(async (req, res) => {
 const getMyFacilities = catchAsync(async (req, res) => {
   const { _id: userId } = req.user as any;
 
-
   const facilities = await Facility.find({ userId }).populate({
     path: "userId",
     select: "firstName lastName email phoneNumber",
@@ -168,11 +167,17 @@ const getAllFacilities = catchAsync(async (req, res) => {
     rating,
     availability,
     status,
+    isFeatured,
     page = 1,
     limit = 10,
   } = req.query;
 
   const filter: any = {};
+
+  // 🌟 Featured facilities
+  if (typeof isFeatured !== "undefined") {
+    filter.isFeatured = isFeatured === "true";
+  }
 
   // 🔎 Search by name or location
   if (search) {
@@ -332,8 +337,8 @@ const updateFacility = catchAsync(async (req, res) => {
           const name = Array.isArray(names)
             ? names[i]
             : typeof names === "string"
-              ? names
-              : "Amenities Service";
+            ? names
+            : "Amenities Service";
 
           newAmenitiesServices.push({
             name,
@@ -358,39 +363,39 @@ const updateFacility = catchAsync(async (req, res) => {
       typeof deleteImageIds === "string"
         ? deleteImageIds.split(",")
         : Array.isArray(deleteImageIds)
-          ? deleteImageIds
-          : [];
+        ? deleteImageIds
+        : [];
 
     const amenityNamesToDelete: string[] =
       typeof deleteAmenitiesServiceNames === "string"
         ? deleteAmenitiesServiceNames.split(",")
         : Array.isArray(deleteAmenitiesServiceNames)
-          ? deleteAmenitiesServiceNames
-          : [];
+        ? deleteAmenitiesServiceNames
+        : [];
 
     const medicaidIdsToDelete: string[] =
       typeof deleteMedicaidIds === "string"
         ? deleteMedicaidIds.split(",")
         : Array.isArray(deleteMedicaidIds)
-          ? deleteMedicaidIds
-          : [];
+        ? deleteMedicaidIds
+        : [];
 
     const updatedImages = Array.isArray(facility.images)
       ? facility.images.filter(
-        (img: any) => !imageIdsToDelete.includes(img.public_id)
-      )
+          (img: any) => !imageIdsToDelete.includes(img.public_id)
+        )
       : [];
 
     const updatedAmenitiesServices = Array.isArray(facility.amenitiesServices)
       ? facility.amenitiesServices.filter(
-        (s: any) => !amenityNamesToDelete.includes(s.name)
-      )
+          (s: any) => !amenityNamesToDelete.includes(s.name)
+        )
       : [];
 
     const updatedMedicaid = Array.isArray(facility.medicaidPrograms)
       ? facility.medicaidPrograms.filter(
-        (file: any) => !medicaidIdsToDelete.includes(file.public_id)
-      )
+          (file: any) => !medicaidIdsToDelete.includes(file.public_id)
+        )
       : [];
 
     const updatedVideo = deleteVideo === "true" ? "" : facility.uploadVideo;
@@ -459,7 +464,7 @@ const getSingleFacility = catchAsync(async (req, res) => {
 });
 
 const getAllFacilitiesLocations = catchAsync(async (req, res) => {
-  const facilities = await Facility.find().select('location');
+  const facilities = await Facility.find().select("location");
 
   return sendResponse(res, {
     statusCode: 200,
@@ -467,12 +472,11 @@ const getAllFacilitiesLocations = catchAsync(async (req, res) => {
     message: "Facilities locations retrieved successfully",
     data: facilities,
   });
-})
+});
 
 const facilityDashboardSummary = catchAsync(async (req, res) => {
   const { _id: userId } = req.user as any;
   const { facilityId } = req.params;
-
 
   const user = await User.findById(userId);
   if (!user) throw new AppError(404, "User not found");
@@ -487,8 +491,9 @@ const facilityDashboardSummary = catchAsync(async (req, res) => {
   }
 
   const visitTour = await VisitBooking.countDocuments({ facility: facilityId });
-  const facilityBookings = await BookHome.countDocuments({ facility: facilityId });
-
+  const facilityBookings = await BookHome.countDocuments({
+    facility: facilityId,
+  });
 
   return sendResponse(res, {
     statusCode: 200,
@@ -524,7 +529,6 @@ const updateFacilityStatus = catchAsync(async (req, res) => {
   });
 });
 
-
 const facilityController = {
   createFacility,
   getMyFacilities,
@@ -533,6 +537,6 @@ const facilityController = {
   getSingleFacility,
   getAllFacilitiesLocations,
   facilityDashboardSummary,
-  updateFacilityStatus
+  updateFacilityStatus,
 };
 export default facilityController;
