@@ -1,6 +1,10 @@
 import { Router } from "express";
 import facilityController from "../controllers/facility.controller";
-import { isOrganization, protect } from "../middlewares/auth.middleware";
+import {
+  isAdmin,
+  isOrganization,
+  protect,
+} from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/multer.middleware";
 
 const router = Router();
@@ -27,8 +31,12 @@ router.get(
 
 router.get("/all", facilityController.getAllFacilities);
 router.get("/locations", facilityController.getAllFacilitiesLocations);
-router.get("/summary/:facilityId", protect,
-  isOrganization, facilityController.facilityDashboardSummary);
+router.get(
+  "/summary/:facilityId",
+  protect,
+  isOrganization,
+  facilityController.facilityDashboardSummary
+);
 
 router.put(
   "/update/:facilityId",
@@ -54,6 +62,14 @@ router.put(
   // protect,
   // isOrganization,
   facilityController.updateFacilityStatus
+);
+
+// update facility type (featured or not)
+router.put(
+  "/update-type/:facilityId",
+  protect,
+  isAdmin,
+  facilityController.updateFacilityType
 );
 
 export const facilityRouter = router;

@@ -29,6 +29,7 @@ export interface IFacility extends Document {
   status: 'approved' | 'pending' | 'declined'
   totalTour: number
   totalPlacement: number
+  isFeatured: boolean
 }
 
 export type FacilityModel = Model<IFacility>
