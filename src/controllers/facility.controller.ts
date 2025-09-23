@@ -529,6 +529,27 @@ const updateFacilityStatus = catchAsync(async (req, res) => {
   });
 });
 
+const updateFacilityType = catchAsync(async (req, res) => {
+  const { facilityId } = req.params;
+  const facility = await Facility.findById(facilityId);
+  if (!facility) {
+    throw new AppError(404, "Facility not found");
+  }
+
+  const updatedFacility = await Facility.findByIdAndUpdate(
+    facilityId,
+    { isFeatured: !facility.isFeatured },
+    { new: true, runValidators: true }
+  );
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Facility type updated successfully",
+    data: updatedFacility,
+  });
+});
+
 const facilityController = {
   createFacility,
   getMyFacilities,
@@ -538,5 +559,6 @@ const facilityController = {
   getAllFacilitiesLocations,
   facilityDashboardSummary,
   updateFacilityStatus,
+  updateFacilityType,
 };
 export default facilityController;
