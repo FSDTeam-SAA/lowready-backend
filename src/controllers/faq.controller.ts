@@ -69,16 +69,20 @@ const deleteFaq = catchAsync(async (req, res) => {
 const getAllFaqs = catchAsync(async (req, res) => {
   const { page } = req.query;
 
-  // Validate page input
-  if (page !== "home" && page !== "faq") {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid page type. Must be 'home' or 'faq'.",
-    });
-  }
+  let filter = {};
 
-  // Map page to schema field
-  const filter = page === "home" ? { home: true } : { faq: true };
+  if (page) {
+    // Validate page input
+    if (page !== "home" && page !== "faq") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid page type. Must be 'home' or 'faq'.",
+      });
+    }
+
+    // Map page to schema field
+    filter = page === "home" ? { home: true } : { faq: true };
+  }
 
   const faqs = await Faq.find(filter).sort({ createdAt: -1 });
 
