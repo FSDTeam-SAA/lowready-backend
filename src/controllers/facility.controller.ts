@@ -230,10 +230,12 @@ const getAllFacilities = catchAsync(async (req, res) => {
 
   // ✅ Availability filter
   if (availability && availability !== "all") {
-    if (availability === "true") {
-      filter.availability = true;
-    } else if (availability === "false") {
-      filter.availability = false;
+    if (availability === "available") {
+      filter.availability = "available";
+    } else if (availability === "unavailable") {
+      filter.availability = "unavailable";
+    } else if (availability === "limited") {
+      filter.availability = "limited";
     }
   }
 

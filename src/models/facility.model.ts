@@ -3,7 +3,7 @@ import { IFacility, FacilityModel } from "../interface/facility.interface";
 
 const facilitySchema: Schema = new Schema<IFacility>(
   {
-    availability: { type: Boolean, default: true },
+    availability: { type: String, default: "available" },
     name: { type: String, required: [true, "Name is required"] },
     location: { type: String, required: [true, "Location is required"] },
     address: { type: String, required: [true, "Address is required"] },
