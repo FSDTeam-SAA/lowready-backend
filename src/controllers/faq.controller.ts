@@ -67,7 +67,20 @@ const deleteFaq = catchAsync(async (req, res) => {
 
 // Get All FAQs
 const getAllFaqs = catchAsync(async (req, res) => {
-  const faqs = await Faq.find().sort({ createdAt: -1 });
+  const { page } = req.query;
+
+  // Validate page input
+  if (page !== "home" && page !== "faq") {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid page type. Must be 'home' or 'faq'.",
+    });
+  }
+
+  // Map page to schema field
+  const filter = page === "home" ? { home: true } : { faq: true };
+
+  const faqs = await Faq.find(filter).sort({ createdAt: -1 });
 
   res.status(200).json({
     success: true,
@@ -75,4 +88,59 @@ const getAllFaqs = catchAsync(async (req, res) => {
   });
 });
 
-export { createFaq, editFaq, deleteFaq, getAllFaqs };
+const updateFaqHomePage = catchAsync(async (req, res) => {
+  const { faqId } = req.params;
+
+  // Fetch the FAQ first
+  const faq = await Faq.findById(faqId);
+
+  if (!faq) {
+    return res.status(404).json({
+      success: false,
+      message: "Faq not found",
+    });
+  }
+
+  // Toggle the boolean value
+  faq.home = !faq.home;
+  const updatedFaq = await faq.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Faq updated successfully",
+    data: updatedFaq,
+  });
+});
+
+const updateFaqFaqPage = catchAsync(async (req, res) => {
+  const { faqId } = req.params;
+
+  // Fetch the FAQ first
+  const faq = await Faq.findById(faqId);
+
+  if (!faq) {
+    return res.status(404).json({
+      success: false,
+      message: "Faq not found",
+    });
+  }
+
+  // Toggle the boolean value
+  faq.faq = !faq.faq;
+  const updatedFaq = await faq.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Faq updated successfully",
+    data: updatedFaq,
+  });
+});
+
+export {
+  createFaq,
+  editFaq,
+  deleteFaq,
+  getAllFaqs,
+  updateFaqHomePage,
+  updateFaqFaqPage,
+};
