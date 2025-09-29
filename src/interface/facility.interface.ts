@@ -1,38 +1,38 @@
-import { Document, Model, Types } from 'mongoose'
-import { IUser } from './user.interface'
+import { Document, Model, Types } from "mongoose";
+import { IUser } from "./user.interface";
 
 export interface IFacility extends Document {
-  availability: boolean
-  name: string
-  location: string
-  address: string
-  description: string
-  price: number
-  userId: Types.ObjectId | IUser
-  images: { public_id: string; url: string }[]
-  base: 'monthly' | 'yearly'
-  careServices: string[]
-  amenities: string[]
+  availability: "available" | "unavailable" | "limited";
+  name: string;
+  location: string;
+  address: string;
+  description: string;
+  price: number;
+  userId: Types.ObjectId | IUser;
+  images: { public_id: string; url: string }[];
+  base: "monthly" | "yearly";
+  careServices: string[];
+  amenities: string[];
   amenitiesServices: {
-    name: string
-    image: { public_id: string; url: string }
-  }[]
-  about: string
-  videoTitle: string
-  videoDescription: string
-  uploadVideo: string
-  availableTime: string[]
-  facilityLicenseNumber?: string
-  medicaidPrograms: { public_id: string; url: string }[]
-  rating: number
-  ratingCount: number
-  status: 'approved' | 'pending' | 'declined'
-  totalTour: number
-  totalPlacement: number
-  isFeatured: boolean
+    name: string;
+    image: { public_id: string; url: string };
+  }[];
+  about: string;
+  videoTitle: string;
+  videoDescription: string;
+  uploadVideo: string;
+  availableTime: string[];
+  facilityLicenseNumber?: string;
+  medicaidPrograms: { public_id: string; url: string }[];
+  rating: number;
+  ratingCount: number;
+  status: "approved" | "pending" | "declined";
+  totalTour: number;
+  totalPlacement: number;
+  isFeatured: boolean;
 }
 
-export type FacilityModel = Model<IFacility>
+export type FacilityModel = Model<IFacility>;
 
 // import { Document, Model, Types } from "mongoose";
 
