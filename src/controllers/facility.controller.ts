@@ -228,15 +228,14 @@ const getAllFacilities = catchAsync(async (req, res) => {
     }
   }
 
-  // ✅ Availability filter
+  // ✅ Availability filter (support multiple values)
   if (availability && availability !== "all") {
-    if (availability === "available") {
-      filter.availability = "available";
-    } else if (availability === "unavailable") {
-      filter.availability = "unavailable";
-    } else if (availability === "limited") {
-      filter.availability = "limited";
-    }
+    // If `availability` can be a comma-separated string (e.g., "available,limited")
+    const availabilityArray = Array.isArray(availability)
+      ? availability
+      : (availability as string).split(",");
+
+    filter.availability = { $in: availabilityArray };
   }
 
   // ✅ Status filter (e.g., pending, approved, rejected)
