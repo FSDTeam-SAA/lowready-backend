@@ -18,8 +18,8 @@ export const createBooking = catchAsync(async (req: Request, res: Response) => {
     const isFacilityExists = await Facility.findById(booking.facility)
     if (!isFacilityExists) throw new AppError(404, 'Facility not found ')
 
-    if (isFacilityExists.availability === false) {
-      throw new AppError(400, 'Facility is not available for booking')
+    if (isFacilityExists.availability === "unavailable") {
+      throw new AppError(400, "Facility is not available for booking");
     }
 
     if (isFacilityExists.status === 'pending') {
