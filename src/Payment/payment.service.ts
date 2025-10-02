@@ -42,7 +42,7 @@ export const createCheckoutSession = async (
     const plan = await SubscriptionPlan.findById(referenceId);
     if (!plan || !plan.isActive) throw new Error('Subscription plan not found or inactive');
 
-   const planPriceCents = Math.round(plan.price * 100); // ✅ normalize once
+   const planPriceCents = Math.round(plan.price * 100); 
 
     if (billingCycle === 'yearly') {
       lineItemAmount = amount
