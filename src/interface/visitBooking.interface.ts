@@ -15,8 +15,6 @@ export interface IVisitBooking extends Document {
   rating?: number
   status: 'upcoming' | 'completed' | 'cancelled'
   feedback?: string
-  roomType?: string
-  serviceType?: string
 }
 
 export type VisitBookingModel = Model<IVisitBooking>

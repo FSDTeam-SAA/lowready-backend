@@ -22,8 +22,6 @@ const visitBookingSchema: Schema = new Schema<IVisitBooking>(
       default: "upcoming",
     },
     feedback: { type: String },
-    roomType: { type: String },
-    serviceType: { type: String },
   },
   { timestamps: true, versionKey: false }
 );

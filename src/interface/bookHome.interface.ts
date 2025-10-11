@@ -8,11 +8,13 @@ export interface IResidentialInfo {
 }
 
 export interface IBookHome extends Document {
-  facility: Types.ObjectId
-  userId: Types.ObjectId
-  startingDate: Date
-  duration: string
-  paymentStatus: 'paid' | 'canceled'| 'pending'
-  residentialInfo: IResidentialInfo[]
-  totalPrice: number
+  facility: Types.ObjectId;
+  userId: Types.ObjectId;
+  startingDate: Date;
+  duration: string;
+  paymentStatus: "paid" | "canceled" | "pending";
+  residentialInfo: IResidentialInfo[];
+  totalPrice: number;
+  roomType?: string;
+  serviceType?: string;
 }

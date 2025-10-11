@@ -13,20 +13,22 @@ const residentialInfoSchema = new Schema<IResidentialInfo>(
 
 const bookHomeSchema = new Schema<IBookHome>(
   {
-    facility: { type: Schema.Types.ObjectId, ref: 'Facility', required: true },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    facility: { type: Schema.Types.ObjectId, ref: "Facility", required: true },
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     startingDate: { type: Date, required: true },
     duration: { type: String, required: true },
     paymentStatus: {
       type: String,
-      enum: ['paid', 'canceled', 'pending'],
-      default: 'paid',
+      enum: ["paid", "canceled", "pending"],
+      default: "paid",
     },
     residentialInfo: [residentialInfoSchema],
     totalPrice: { type: Number, required: true },
+    roomType: { type: String },
+    serviceType: { type: String },
   },
   { timestamps: true }
-)
+);
 
 export const BookHome: Model<IBookHome> = mongoose.model<IBookHome>(
   'BookHome',

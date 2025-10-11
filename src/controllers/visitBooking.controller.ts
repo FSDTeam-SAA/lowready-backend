@@ -20,8 +20,6 @@ const createVisitBooking = catchAsync(async (req, res) => {
       facility,
       visitDate,
       visitTime,
-      roomType,
-      serviceType
     } = req.body
     const { _id: userId } = req.user as any
 
@@ -62,9 +60,7 @@ const createVisitBooking = catchAsync(async (req, res) => {
       message,
       facility,
       visitDate,
-      visitTime,
-      roomType,
-      serviceType
+      visitTime
     });
 
     // 🔔 Send notification after booking
