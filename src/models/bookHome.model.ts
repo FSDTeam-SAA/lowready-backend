@@ -3,9 +3,9 @@ import { IBookHome, IResidentialInfo } from '../interface/bookHome.interface'
 
 const residentialInfoSchema = new Schema<IResidentialInfo>(
   {
-    name: { type: String, required: true },
-    dateOfBirth: { type: Date, required: true },
-    gender: { type: String, enum: ['male', 'female'], required: true },
+    name: { type: String},
+    dateOfBirth: { type: Date },
+    gender: { type: String, enum: ['male', 'female'] },
     requirements: { type: String, default: '' },
   },
   { _id: false } // prevent extra ObjectId for each entry
