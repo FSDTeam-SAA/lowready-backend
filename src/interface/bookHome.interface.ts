@@ -1,9 +1,9 @@
 import { Document, Types } from 'mongoose'
 
 export interface IResidentialInfo {
-  name: string
-  dateOfBirth: Date
-  gender: 'male' | 'female'
+  name?: string
+  dateOfBirth?: Date
+  gender?: 'male' | 'female'
   requirements?: string
 }
 
@@ -13,7 +13,7 @@ export interface IBookHome extends Document {
   startingDate: Date;
   duration: string;
   paymentStatus: "paid" | "canceled" | "pending";
-  residentialInfo: IResidentialInfo[];
+  residentialInfo?: IResidentialInfo[];
   totalPrice: number;
   roomType?: string;
   serviceType?: string;
